@@ -1148,7 +1148,7 @@ const EmployeeDashboard: React.FC<{
                   
                   {/* SECCIÓN 2: TABLA DE ARTÍCULOS */}
                     <div className="overflow-x-auto -mx-2 px-2 pb-2">
-                      <div className="min-w-[450px]">
+                      <div className="min-w-[800px]">
                         {/* Table Header */}
                         <div className="flex items-center gap-4 pb-4 mb-4 opacity-50 px-2 justify-between">
                           <div className="min-w-0 flex-1 pl-2 text-[10px] font-black uppercase tracking-[0.2em] text-white">Descripción del Artículo</div>
@@ -1423,7 +1423,7 @@ const AdminDashboard: React.FC<{
                   </h4>
 
                   <div className="overflow-x-auto -mx-2 px-2 pb-2">
-                    <div className="min-w-[500px] space-y-4">
+                    <div className="min-w-[850px] space-y-4">
                       {order.items.map((item, idx) => {
                       const prod = products.find(p => p.id === item.product_id);
                       const itemCost = (prod?.cost || 0) * item.quantity;
