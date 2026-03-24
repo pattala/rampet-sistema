@@ -402,7 +402,7 @@ const App: React.FC = () => {
               <span className="text-sm font-semibold">{role === 'admin' ? 'Administrador' : 'Empleado'}</span>
               <span className="text-[10px] text-muted flex items-center gap-1">
                 <div className={`w-1.5 h-1.5 rounded-full ${isSupabaseConfigured ? 'bg-accent-success' : 'bg-accent-warning'}`}></div>
-                {isSupabaseConfigured ? 'Sync' : 'Local'}
+                <span className="mobile-hide">{isSupabaseConfigured ? 'Sync' : 'Local'}</span>
               </span>
             </div>
             {authRole === 'admin' && (
@@ -1139,17 +1139,18 @@ const EmployeeDashboard: React.FC<{
                   <div className="card-divider" />
                   
                   {/* SECCIÓN 2: TABLA DE ARTÍCULOS */}
-                  <div className="mb-4 px-2">
-                    {/* Table Header */}
-                    <div className="flex items-center gap-4 pb-4 mb-4 opacity-50 px-2 justify-between">
-                      <div className="min-w-0 flex-1 pl-2 text-[10px] font-black uppercase tracking-[0.2em] text-white">Descripción del Artículo</div>
-                      <div className="flex items-center gap-6">
-                        <div className="status-col-fixed text-[10px] font-black uppercase tracking-[0.2em] text-center">Estado</div>
-                        <div className="qty-col-fixed text-[10px] font-black uppercase tracking-[0.2em] text-center pr-2">Cant.</div>
-                      </div>
-                    </div>
-                    
-                    <div className="divide-y divide-white/5">
+                    <div className="overflow-x-auto -mx-2 px-2 pb-2">
+                      <div className="min-w-[450px]">
+                        {/* Table Header */}
+                        <div className="flex items-center gap-4 pb-4 mb-4 opacity-50 px-2 justify-between">
+                          <div className="min-w-0 flex-1 pl-2 text-[10px] font-black uppercase tracking-[0.2em] text-white">Descripción del Artículo</div>
+                          <div className="flex items-center gap-6">
+                            <div className="status-col-fixed text-[10px] font-black uppercase tracking-[0.2em] text-center">Estado</div>
+                            <div className="qty-col-fixed text-[10px] font-black uppercase tracking-[0.2em] text-center pr-2">Cant.</div>
+                          </div>
+                        </div>
+                        
+                        <div className="divide-y divide-white/5">
                       {order.items.map((item, idx) => {
                         const showInMyOrders = ['placed', 'visto', 'en_curso', 'anulado'].includes(item.status);
                         const showInReception = item.status === 'bought';
@@ -1266,11 +1267,12 @@ const EmployeeDashboard: React.FC<{
                               </div>
                             </div>
                           )}
-                        </React.Fragment>
-                      );
+                          </React.Fragment>
+                        );
                       })}
                     </div>
                   </div>
+                </div>
 
                   {order.notes && (
                     <>
@@ -1412,8 +1414,9 @@ const AdminDashboard: React.FC<{
                     <Package size={16} className="text-primary" /> Detalle Lote: <span className="text-primary">{order.items.length} ÍTEMS</span>
                   </h4>
 
-                  <div className="space-y-4">
-                    {order.items.map((item, idx) => {
+                  <div className="overflow-x-auto -mx-2 px-2 pb-2">
+                    <div className="min-w-[500px] space-y-4">
+                      {order.items.map((item, idx) => {
                       const prod = products.find(p => p.id === item.product_id);
                       const itemCost = (prod?.cost || 0) * item.quantity;
 
@@ -1563,6 +1566,7 @@ const AdminDashboard: React.FC<{
                         </div>
                       );
                     })}
+                    </div>
                   </div>
                 </div>
 

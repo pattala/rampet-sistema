@@ -216,6 +216,46 @@ h1, h2, h3 {
 .min-w-0 { min-width: 0; }
 .h-fit { height: fit-content; }
 .overflow-y-auto { overflow-y: auto; }
+.overflow-x-auto { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.whitespace-nowrap { white-space: nowrap; }
+
+/* REFINAMIENTOS RESPONSIVOS (MOBILE) */
+@media (max-width: 768px) {
+  .glass-panel {
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .modern-order-card {
+    padding: 1rem !important;
+    margin-bottom: 2rem !important;
+  }
+
+  h1, .text-3xl { font-size: 1.5rem !important; }
+  h2, .text-2xl { font-size: 1.25rem !important; }
+  
+  .product-card {
+    padding: 1rem !important;
+  }
+
+  .btn {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  /* Ajustes de tabla para que no se rompan */
+  .qty-col-fixed { min-width: 40px; }
+  .status-col-fixed { min-width: 80px; }
+
+  /* Ajustes de espaciado en grillas */
+  .grid-cols-1 { gap: 1rem !important; }
+  
+  /* Ocultar elementos secundarios en móvil para ganar espacio */
+  .mobile-hide { display: none !important; }
+  
+  /* Hacer que los inputs ocupen todo el ancho */
+  .input-field { font-size: 16px !important; /* Evita zoom automático en iOS */ }
+}
 .max-h-\[600px\] { max-height: 600px; }
 .max-h-\[400px\] { max-height: 400px; }
 
