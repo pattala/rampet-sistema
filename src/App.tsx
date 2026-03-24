@@ -498,7 +498,6 @@ const App: React.FC = () => {
             onBuyItem={handleBuyItem} onUpdateItemStatus={handleUpdateItemStatus} activeTab={activeTab as OrderStatus} isSubmitting={isSubmitting}
             setDateModal={setDateModal}
             setTempDate={setTempDate}
-            setSystemModal={setSystemModal}
             setCancelItemModal={setCancelItemModal}
           />
         )}
@@ -1321,9 +1320,8 @@ const AdminDashboard: React.FC<{
   isSubmitting: boolean;
   setDateModal: React.Dispatch<React.SetStateAction<{ isOpen: boolean; title: string; onConfirm: (date: string) => void; }>>;
   setTempDate: (d: string) => void;
-  setSystemModal: React.Dispatch<React.SetStateAction<any>>;
   setCancelItemModal: React.Dispatch<React.SetStateAction<{ isOpen: boolean; order: Order | null; itemId: string | null; note: string; }>>;
-}> = ({ orders, products, onUpdateStatus, onClearProducts, onBuyItem, onUpdateItemStatus, activeTab, isSubmitting, setDateModal, setTempDate, setSystemModal, setCancelItemModal }) => {
+}> = ({ orders, products, onUpdateStatus, onClearProducts, onBuyItem, onUpdateItemStatus, activeTab, isSubmitting, setDateModal, setTempDate, setCancelItemModal }) => {
   const filteredOrders = orders.filter(o => {
     const isSalesTab = activeTab === 'pending';
     const isPurchasesTab = activeTab === 'bought';
