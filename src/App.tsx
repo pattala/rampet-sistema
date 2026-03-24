@@ -395,7 +395,9 @@ const App: React.FC = () => {
             <div className="bg-white rounded-lg flex items-center justify-center p-1 shadow-lg shrink-0 overflow-hidden" style={{ width: '80px', height: '40px' }}>
               <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
             </div>
-            <span id="debug-header-dashboard" className="font-black text-xl tracking-tighter text-white">RAMPET SISTEMA</span>
+            <span id="debug-header-dashboard" className="font-black text-xl tracking-tighter text-white">
+              RAMPET <span className="hidden sm:inline">SISTEMA</span>
+            </span>
           </div>
           <div className="flex items-center gap-4">
             <div className="hidden md:flex flex-col items-end">
@@ -408,9 +410,10 @@ const App: React.FC = () => {
             {authRole === 'admin' && (
               <button 
                 onClick={() => setRole(null)} 
-                className="hidden md:flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:text-white px-3 py-2 rounded-lg border border-primary/20 hover:bg-primary/20 transition-all mx-2"
+                className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:text-white px-2 sm:px-3 py-2 rounded-lg border border-primary/20 hover:bg-primary/20 transition-all mx-1 sm:mx-2"
               >
-                Cambiar Vista
+                <span className="hidden sm:inline">Cambiar Vista</span>
+                <span className="sm:hidden">VISTA</span>
               </button>
             )}
             <button onClick={handleLogout} className="p-2 hover:bg-glass-bg rounded-full transition-colors"><LogOut size={20} /></button>
@@ -866,9 +869,14 @@ const EmployeeDashboard: React.FC<{
               <label className="btn btn-primary py-3 px-8 flex items-center gap-2 cursor-pointer shadow-lg group relative w-full sm:w-auto justify-center">
                 <FileUp size={18} className="group-hover:scale-110 transition-transform" /> 
                 <span className="text-[11px] uppercase tracking-widest font-black">
-                  {importStatus === 'success' ? '¡LISTA ACTUALIZADA!' : 'Importar Listado Excel'}
+                  {importStatus === 'success' ? '¡LISTO!' : (
+                    <>
+                      <span className="hidden sm:inline">Importar Listado Excel</span>
+                      <span className="sm:hidden">Importar</span>
+                    </>
+                  )}
                 </span>
-                <input type="file" className="hidden" accept=".xlsx,.xls" onChange={handleFileUpload} />
+                <input type="file" style={{ display: 'none' }} accept=".xlsx,.xls" onChange={handleFileUpload} />
                 {importStatus === 'success' && (
                   <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-accent-success text-white text-[9px] font-bold py-1.5 px-3 rounded shadow-xl animate-bounce whitespace-nowrap z-50">
                     ✓ CARGA EXITOSA
