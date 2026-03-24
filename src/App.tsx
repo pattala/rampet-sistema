@@ -3,11 +3,15 @@ import { ShoppingBag, LayoutDashboard, Truck, Search, Trash2, Plus, Minus, LogOu
 import { motion } from 'framer-motion';
 import { supabase } from './supabaseClient';
 import type { Order, Product, UserRole, OrderStatus, OrderItem, OrderItemStatus } from './types';
+import { AuthScreen } from './components/AuthScreen';
 
 const isSupabaseConfigured = !!supabase;
 
 const App: React.FC = () => {
+  const [authRole, setAuthRole] = useState<UserRole | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
+  const [session, setSession] = useState<any>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
   const [activeTab, setActiveTab] = useState<OrderStatus | 'stats'>(() => {
     const saved = localStorage.getItem('vidal_active_tab');
@@ -47,6 +51,41 @@ const App: React.FC = () => {
       localStorage.removeItem('vidal_role');
     }
   }, [role]);
+
+  useEffect(() => {
+    if (!supabase) {
+      setAuthLoading(false);
+      return;
+    }
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) {
+        const metadataRole = session.user?.user_metadata?.role || 'employee';
+        setAuthRole(metadataRole);
+        if (metadataRole !== 'admin') {
+          setRole('employee');
+        }
+      }
+      setAuthLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session) {
+        const metadataRole = session.user?.user_metadata?.role || 'employee';
+        setAuthRole(metadataRole);
+        if (metadataRole !== 'admin') {
+          setRole('employee');
+        }
+      } else {
+        setAuthRole(null);
+        setRole(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('vidal_active_tab', activeTab);
@@ -287,28 +326,65 @@ const App: React.FC = () => {
     setActiveTab('pending');
   };
 
+  const handleLogout = async () => {
+    if (supabase) await supabase.auth.signOut();
+    setSession(null);
+    setAuthRole(null);
+    setRole(null);
+  };
+
   return (
     <div className="min-h-screen">
-      {!role ? (
+      {authLoading ? (
         <div className="flex items-center justify-center p-4 min-h-screen">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-panel w-full max-w-md text-center">
+          <div className="animate-spin text-primary flex items-center justify-center">
+            <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 shadow-2xl">
+              <ShoppingBag size={32} />
+            </div>
+          </div>
+        </div>
+      ) : !session || !authRole ? (
+        <AuthScreen onLoginSuccess={(sess, newRole) => {
+          setSession(sess);
+          setAuthRole(newRole);
+          if (newRole !== 'admin') {
+            setRole('employee');
+          }
+        }} />
+      ) : !role && authRole === 'admin' ? (
+        <div className="flex items-center justify-center p-4 min-h-screen">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel w-full max-w-sm text-center p-8">
             <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center p-2 shadow-xl shadow-black/20">
+              <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center p-2 shadow-xl shadow-black/20 border border-white/10">
                 <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
               </div>
             </div>
-            <h1 id="debug-header-centered" className="text-3xl font-black mb-1 uppercase tracking-tighter text-white">RAMPET SISTEMA</h1>
-          <p id="debug-subtitle-centered" className="text-muted mb-8">Seleccione su rol para ingresar</p>
-          <div className="grid gap-4">
-            <button onClick={() => setRole('employee')} className="btn btn-primary w-full p-6 flex flex-col items-center gap-3 h-auto">
-              <Truck size={32} />
-              <div><div className="text-lg">Empleado</div><div className="text-xs font-normal opacity-70">Realizar pedidos</div></div>
-            </button>
-            <button onClick={() => setRole('admin')} className="btn w-full p-6 flex flex-col items-center gap-3 h-auto border border-glass-border hover:bg-glass-bg">
-              <LayoutDashboard size={32} />
-              <div><div className="text-lg">Administrador</div><div className="text-xs font-normal opacity-70">Gestionar compras</div></div>
-            </button>
+            <h1 className="text-2xl font-black mb-1 text-white tracking-widest uppercase">MODO DE VISTA</h1>
+            <p className="text-xs font-bold text-muted uppercase tracking-[0.2em] mb-8">Elige tu interfaz</p>
+            <div className="grid gap-4">
+              <button onClick={() => setRole('employee')} className="btn btn-primary w-full p-4 flex flex-col items-center gap-2 h-auto group relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary-hover to-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <Truck size={24} className="relative z-10" />
+                <div className="relative z-10">
+                  <div className="text-sm font-black tracking-widest uppercase mb-1">Cargar Pedidos</div>
+                  <div className="text-[9px] font-bold opacity-70 uppercase tracking-widest text-primary-100">Como Sucursal</div>
+                </div>
+              </button>
+              <button onClick={() => setRole('admin')} className="btn w-full p-4 flex flex-col items-center gap-2 h-auto border border-glass-border hover:bg-white/5 group relative overflow-hidden">
+                <LayoutDashboard size={24} className="text-white group-hover:scale-110 transition-transform" />
+                <div className="relative z-10 text-white">
+                  <div className="text-sm font-black tracking-widest uppercase mb-1">Gestión Central</div>
+                  <div className="text-[9px] font-bold opacity-70 uppercase tracking-widest">Aprobar y Comprar</div>
+                </div>
+              </button>
             </div>
+            
+            <button 
+              onClick={handleLogout}
+              className="mt-8 text-[10px] font-bold text-muted hover:text-white uppercase tracking-widest transition-colors flex items-center gap-2 mx-auto"
+            >
+              <LogOut size={14} /> Cerrar Sesión Segura
+            </button>
           </motion.div>
         </div>
       ) : (
@@ -329,7 +405,15 @@ const App: React.FC = () => {
                 {isSupabaseConfigured ? 'Sync' : 'Local'}
               </span>
             </div>
-            <button onClick={() => setRole(null)} className="p-2 hover:bg-glass-bg rounded-full transition-colors"><LogOut size={20} /></button>
+            {authRole === 'admin' && (
+              <button 
+                onClick={() => setRole(null)} 
+                className="hidden md:flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:text-white px-3 py-2 rounded-lg border border-primary/20 hover:bg-primary/20 transition-all mx-2"
+              >
+                Cambiar Vista
+              </button>
+            )}
+            <button onClick={handleLogout} className="p-2 hover:bg-glass-bg rounded-full transition-colors"><LogOut size={20} /></button>
           </div>
         </div>
       </header>
