@@ -1568,7 +1568,7 @@ const AdminDashboard: React.FC<{
                                     )}
                                     <div className="flex flex-col items-center gap-1">
                                       <Clock size={14} />
-                                      <span>NUEVO</span>
+                                      <span>PENDIENTE</span>
                                     </div>
                                   </>
                                 )}
@@ -1588,13 +1588,25 @@ const AdminDashboard: React.FC<{
                                 {item.status === 'bought' && (
                                   <div className="flex flex-col items-center gap-1">
                                     <ShoppingBag size={14} />
-                                    <span>COMPRADO</span>
+                                    <span>CAMINO</span>
+                                  </div>
+                                )}
+                                {item.status === 'received' && (
+                                  <div className="flex flex-col items-center gap-1 text-accent-success">
+                                    <CheckCircle size={14} />
+                                    <span>RECIBIDO</span>
                                   </div>
                                 )}
                                 {item.status === 'anulado' && (
                                   <div className="flex flex-col items-center gap-1 text-red-500">
                                     <XCircle size={14} />
                                     <span>ANULADO</span>
+                                  </div>
+                                )}
+                                {item.status === 'anulado_historial' && (
+                                  <div className="flex flex-col items-center gap-1 opacity-50 text-red-500">
+                                    <XCircle size={14} />
+                                    <span className="text-[9px]">CANCELADO</span>
                                   </div>
                                 )}
                               </div>
