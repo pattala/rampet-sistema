@@ -1148,7 +1148,7 @@ const EmployeeDashboard: React.FC<{
                   
                   {/* SECCIÓN 2: TABLA DE ARTÍCULOS */}
                     <div className="overflow-x-auto -mx-2 px-2 pb-2">
-                      <div className="min-w-[800px]">
+                      <div className="w-full">
                         {/* Table Header */}
                         <div className="flex items-center gap-4 pb-4 mb-4 opacity-50 px-2 justify-between">
                           <div className="min-w-0 flex-1 pl-2 text-[10px] font-black uppercase tracking-[0.2em] text-white">Descripción del Artículo</div>
@@ -1171,8 +1171,8 @@ const EmployeeDashboard: React.FC<{
                         return (
                           <React.Fragment key={idx}>
                             <div className="item-row-minimal group px-2 py-5 justify-between hover:bg-white/[0.02] rounded-xl transition-all duration-300">
-                            <div className="min-w-0 flex-1 pl-2">
-                              <div className="text-[14px] font-bold text-white uppercase tracking-tight group-hover:text-primary transition-colors duration-200 truncate pr-6">
+                            <div className="flex-1 pl-2">
+                              <div className="text-[14px] font-bold text-white uppercase tracking-tight group-hover:text-primary transition-colors duration-200 whitespace-normal pr-6">
                                 {item.product_name}
                               </div>
                               <div className="text-[11px] text-muted font-mono mt-2 opacity-70 flex items-center gap-2">
@@ -1423,7 +1423,7 @@ const AdminDashboard: React.FC<{
                   </h4>
 
                   <div className="overflow-x-auto -mx-2 px-2 pb-2">
-                    <div className="min-w-[850px] space-y-4">
+                    <div className="w-full space-y-4">
                       {order.items.map((item, idx) => {
                       const prod = products.find(p => p.id === item.product_id);
                       const itemCost = (prod?.cost || 0) * item.quantity;
@@ -1431,10 +1431,10 @@ const AdminDashboard: React.FC<{
                       return (
                         <div key={idx} className="item-row-minimal group px-2 py-4 justify-between hover:bg-white/[0.03] rounded-2xl transition-all duration-300 border border-transparent hover:border-white/5">
                           <div className="min-w-0 flex-1 pl-2">
-                            <div className="text-[14px] font-bold text-white uppercase tracking-tight group-hover:text-primary transition-colors duration-200 truncate pr-6">
+                            <div className="text-[14px] font-bold text-white uppercase tracking-tight group-hover:text-primary transition-colors duration-200 whitespace-normal pr-6">
                               {item.product_name}
                             </div>
-                            <div className="flex items-center gap-4 mt-2">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2">
                                <span className="text-[11px] text-muted font-mono bg-white/5 px-2 py-0.5 rounded border border-white/5">REF: {prod?.code || 'N/A'}</span>
                                <span className="text-[11px] text-accent-warning font-bold uppercase tracking-widest">Costo: ${itemCost.toLocaleString()}</span>
                                <span className="text-[11px] text-accent-success font-bold uppercase tracking-widest">PVP: ${((prod?.price || 0) * item.quantity).toLocaleString()}</span>

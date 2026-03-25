@@ -888,17 +888,68 @@ h1, h2, h3 {
     box-sizing: border-box;
   }
 
+  /* Hide table headers and labels on mobile to clean up stacked layout */
+  .overflow-x-auto .opacity-50.px-2.justify-between,
+  .overflow-x-auto h4 + .card-divider + .overflow-x-auto {
+    display: none !important;
+  }
+
+  /* Target the specific headers in Admin and Employee views */
+  .overflow-x-auto div[class*="opacity-50"],
+  .overflow-x-auto div[class*="tracking-[0.2em]"] {
+    display: none !important;
+  }
+
   .item-row-minimal {
-    padding: 1rem 0.5rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    padding: 1.5rem 0.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    flex-wrap: nowrap !important;
+  }
+
+  .item-row-minimal > .min-w-0 {
+    width: 100%;
+  }
+
+  .item-row-minimal .flex.items-center.gap-6 {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
   }
 
   .qty-col-fixed {
-    width: 3.5rem;
-    flex-shrink: 0;
+    width: auto;
+    flex: 1;
+    justify-content: center;
   }
 
+  .status-col-fixed {
+    width: auto;
+    flex: 2;
+    justify-content: center;
+    margin-top: 0;
+  }
+
+  .action-icon-refined {
+    padding: 12px;
+    flex: 1;
+  }
+
+  /* Admin specific actions container */
+  .item-row-minimal .flex.items-center.gap-2.pl-4 {
+    width: 100%;
+    padding-left: 0;
+    border-left: none;
+    margin-left: 0;
+    justify-content: space-between;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
   .qty-badge {
     width: 100%;
     flex-direction: row;
