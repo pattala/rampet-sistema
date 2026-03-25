@@ -188,6 +188,17 @@ const App: React.FC = () => {
     });
   };
 
+  const addManualToCart = (name: string, quantity: number) => {
+    setCart(prev => [...prev, {
+      id: crypto.randomUUID(),
+      product_id: `manual-${crypto.randomUUID()}`,
+      product_name: name,
+      quantity: quantity,
+      price: 0,
+      status: 'placed' as const
+    }]);
+  };
+
   const updateCartQuantity = (id: string, delta: number) => {
     setCart(prev => prev.map(item => {
       if (item.id === id) {
@@ -486,6 +497,7 @@ const App: React.FC = () => {
         {role === 'employee' ? (
           <EmployeeDashboard 
             products={products} onProductsImport={setProducts} cart={cart} onAddToCart={addToCart} 
+            onAddManualToCart={addManualToCart}
             onUpdateCartQuantity={updateCartQuantity}
             onRemoveFromCart={removeFromCart} onSubmitOrder={submitOrder} isSubmitting={isSubmitting} 
             orders={orders} onUpdateStatus={handleUpdateStatus} onUpdateItemStatus={handleUpdateItemStatus} activeTab={activeTab as OrderStatus}
@@ -753,14 +765,18 @@ const EmployeeDashboard: React.FC<{
   orderNotes: string;
   onOrderNotesChange: (notes: string) => void;
   onUpdateItemStatus: (order: Order, itemId: string, s: OrderItemStatus, d?: string, cn?: string) => void;
+  onAddManualToCart?: (name: string, quantity: number) => void;
 }> = ({ 
-  products, onProductsImport, cart, onAddToCart, onUpdateCartQuantity, onRemoveFromCart, 
+  products, onProductsImport, cart, onAddToCart, onAddManualToCart, onUpdateCartQuantity, onRemoveFromCart, 
   onSubmitOrder, isSubmitting, orders, onUpdateStatus, activeTab, editingOrderId, onEditOrder, 
   onDeleteOrder, onCancelEdit, orderNotes, onOrderNotesChange, onUpdateItemStatus
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('TODOS');
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [showManualForm, setShowManualForm] = useState(false);
+  const [manualName, setManualName] = useState('');
+  const [manualQty, setManualQty] = useState(1);
   
   const cartContainerRef = React.useRef<HTMLDivElement>(null);
 
@@ -919,9 +935,67 @@ const EmployeeDashboard: React.FC<{
                       <option key={cat} value={cat} className="bg-bg-dark">{cat}</option>
                     ))}
                   </select>
-                  <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+                  <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
                 </div>
               </div>
+            </div>
+
+            {/* PRODUCTO MANUAL FORM */}
+            <div className="mt-4 pt-4 border-t border-white/5">
+              {!showManualForm ? (
+                <button 
+                  onClick={() => setShowManualForm(true)}
+                  className="flex items-center gap-2 text-[10px] font-black text-primary hover:text-white uppercase tracking-[0.2em] transition-all bg-primary/5 hover:bg-primary/10 px-4 py-3 rounded-xl border border-primary/10 w-full justify-center"
+                >
+                  <Plus size={14} /> ¿No encuentras un producto? Agrégalo manualmente
+                </button>
+              ) : (
+                <div className="glass-panel p-6 border-primary/30 animate-in slide-in-from-top-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-[12px] font-black text-white uppercase tracking-widest flex items-center gap-2">
+                       <Package size={16} className="text-primary" /> Nuevo Producto Manual
+                    </h4>
+                    <button onClick={() => setShowManualForm(false)} className="text-muted hover:text-white transition-colors">
+                      <XCircle size={18} />
+                    </button>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-4 items-end">
+                    <div className="flex-1 w-full flex flex-col gap-2">
+                      <label className="text-[9px] font-black text-muted uppercase tracking-widest pl-1">Nombre del artículo</label>
+                      <input 
+                        type="text" 
+                        value={manualName}
+                        onChange={(e) => setManualName(e.target.value)}
+                        placeholder="Ej: Repuesto especial X..."
+                        className="input-field py-3 px-4 text-sm w-full"
+                      />
+                    </div>
+                    <div className="w-full sm:w-32 flex flex-col gap-2">
+                      <label className="text-[9px] font-black text-muted uppercase tracking-widest pl-1">Cantidad</label>
+                      <input 
+                        type="number" 
+                        value={manualQty}
+                        onChange={(e) => setManualQty(Number(e.target.value))}
+                        min="1"
+                        className="input-field py-3 px-4 text-sm w-full"
+                      />
+                    </div>
+                    <button 
+                      onClick={() => {
+                        if (manualName.trim() && onAddManualToCart) {
+                          onAddManualToCart(manualName, manualQty);
+                          setManualName('');
+                          setManualQty(1);
+                          setShowManualForm(false);
+                        }
+                      }}
+                      className="btn btn-primary py-3 px-8 text-xs font-black w-full sm:w-auto"
+                    >
+                      AGREGAR
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -986,7 +1060,15 @@ const EmployeeDashboard: React.FC<{
                       {/* Product Info */}
                       <div className="min-w-0">
                         <div className="font-bold text-base uppercase tracking-tight text-white/90 leading-tight truncate pr-4">{item.product_name}</div>
-                        <div className="text-[11px] text-muted font-bold mt-1.5 opacity-60">REF: {products.find(p => p.id === item.product_id)?.code || 'N/A'}</div>
+                        <div className="flex items-center gap-2 mt-1.5 ">
+                          {item.product_id.startsWith('manual-') ? (
+                            <span className="text-[9px] font-black bg-primary/20 text-primary border border-primary/30 px-2 py-0.5 rounded-full uppercase tracking-widest">
+                              Producto Manual
+                            </span>
+                          ) : (
+                            <div className="text-[11px] text-muted font-bold opacity-60">REF: {products.find(p => p.id === item.product_id)?.code || 'N/A'}</div>
+                          )}
+                        </div>
                       </div>
 
                       {/* Controls Row: [-] [Badge] [+] [Trash] */}
@@ -1434,11 +1516,17 @@ const AdminDashboard: React.FC<{
                             <div className="text-[14px] font-bold text-white uppercase tracking-tight group-hover:text-primary transition-colors duration-200 whitespace-normal pr-6">
                               {item.product_name}
                             </div>
-                            <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2">
-                               <span className="text-[11px] text-muted font-mono bg-white/5 px-2 py-0.5 rounded border border-white/5">REF: {prod?.code || 'N/A'}</span>
-                               <span className="text-[11px] text-accent-warning font-bold uppercase tracking-widest">Costo: ${itemCost.toLocaleString()}</span>
-                               <span className="text-[11px] text-accent-success font-bold uppercase tracking-widest">PVP: ${((prod?.price || 0) * item.quantity).toLocaleString()}</span>
-                            </div>
+                             <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2">
+                                {item.product_id.startsWith('manual-') ? (
+                                  <span className="text-[9px] font-black bg-primary/20 text-primary border border-primary/30 px-2 py-0.5 rounded-full uppercase tracking-widest">
+                                    Producto Manual
+                                  </span>
+                                ) : (
+                                  <span className="text-[11px] text-muted font-mono bg-white/5 px-2 py-0.5 rounded border border-white/5">REF: {prod?.code || 'N/A'}</span>
+                                )}
+                                <span className="text-[11px] text-accent-warning font-bold uppercase tracking-widest">Costo: ${itemCost.toLocaleString()}</span>
+                                <span className="text-[11px] text-accent-success font-bold uppercase tracking-widest">PVP: ${((prod?.price || 0) * item.quantity).toLocaleString()}</span>
+                             </div>
 
                             {/* DETECCIÓN DE DUPLICADOS EN OTROS PEDIDOS (Admin) */}
                             {(() => {
