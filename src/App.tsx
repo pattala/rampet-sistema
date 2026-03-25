@@ -1742,3 +1742,4 @@ const AdminDashboard: React.FC<{
 };
 
 export default App;
+// Restauración estable v2
