@@ -12,6 +12,7 @@ const App: React.FC = () => {
   const [role, setRole] = useState<UserRole | null>(null);
   const [session, setSession] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  // Manual trigger for Vercel deploy: 2026-03-27-02-16
   const [products, setProducts] = useState<Product[]>([]);
   const [activeTab, setActiveTab] = useState<OrderStatus | 'stats'>(() => {
     const saved = localStorage.getItem('vidal_active_tab');
