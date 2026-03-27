@@ -12,11 +12,11 @@ const App: React.FC = () => {
   const [role, setRole] = useState<UserRole | null>(null);
   const [session, setSession] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  // Manual trigger for Vercel deploy: 2026-03-27-02-16
+  // Manual trigger for Vercel deploy: 2026-03-27-02-21 
   const [products, setProducts] = useState<Product[]>([]);
-  const [activeTab, setActiveTab] = useState<OrderStatus | 'stats'>(() => {
+  const [activeTab, setActiveTab] = useState<OrderStatus | 'stats' | 'totales'>(() => {
     const saved = localStorage.getItem('vidal_active_tab');
-    return (saved as OrderStatus | 'stats') || 'pending';
+    return (saved as OrderStatus | 'stats' | 'totales') || 'pending';
   });
   const [orders, setOrders] = useState<Order[]>([]);
   const [cart, setCart] = useState<OrderItem[]>([]);
@@ -453,26 +453,38 @@ const App: React.FC = () => {
               ]
             : [
                 { id: 'pending', label: 'PEDIDOS', icon: <Plus size={16} /> },
+                { id: 'totales', label: 'TOTALES', icon: <ClipboardList size={16} /> },
                 { id: 'bought', label: 'COMPRAS', icon: <ShoppingBag size={16} /> },
                 { id: 'arriving', label: 'RECEPCIÓN', icon: <Truck size={16} /> },
                 { id: 'received', label: 'HISTORIAL', icon: <CheckCircle size={16} /> },
                 { id: 'stats', label: 'ESTADÍSTICAS', icon: <BarChart2 size={16} /> }
               ]
           ).map(tab => {
-            const count = orders.filter(o => {
-              const isEmployee = role === 'employee';
-              if (isEmployee) {
-                if (tab.id === 'placed') return o.items.some(i => ['placed', 'visto', 'en_curso'].includes(i.status));
-                if (tab.id === 'arriving') return o.items.some(i => i.status === 'bought');
-                if (tab.id === 'received') return o.items.some(i => i.status === 'received');
-              } else {
-                if (tab.id === 'pending') return o.items.some(i => ['placed', 'visto', 'en_curso'].includes(i.status));
-                if (tab.id === 'bought') return o.items.some(i => i.status === 'bought');
-                if (tab.id === 'arriving') return o.items.some(i => i.status === 'bought');
-                if (tab.id === 'received') return o.items.some(i => i.status === 'received');
-              }
-              return false;
-            }).length;
+            // For 'totales' we need a different calculation (unique products)
+            let count = 0;
+            if (role === 'admin' && tab.id === 'totales') {
+              const uniquePendingProducts = new Set(
+                orders.flatMap(o => o.items)
+                  .filter(i => ['placed', 'visto', 'en_curso'].includes(i.status))
+                  .map(i => i.product_id)
+              );
+              count = uniquePendingProducts.size;
+            } else {
+              count = orders.filter(o => {
+                const isEmployee = role === 'employee';
+                if (isEmployee) {
+                  if (tab.id === 'placed') return o.items.some(i => ['placed', 'visto', 'en_curso'].includes(i.status));
+                  if (tab.id === 'arriving') return o.items.some(i => i.status === 'bought');
+                  if (tab.id === 'received') return o.items.some(i => i.status === 'received');
+                } else {
+                  if (tab.id === 'pending') return o.items.some(i => ['placed', 'visto', 'en_curso'].includes(i.status));
+                  if (tab.id === 'bought') return o.items.some(i => i.status === 'bought');
+                  if (tab.id === 'arriving') return o.items.some(i => i.status === 'bought');
+                  if (tab.id === 'received') return o.items.some(i => i.status === 'received');
+                }
+                return false;
+              }).length;
+            }
             const isActive = activeTab === tab.id;
             return (
               <button
@@ -515,6 +527,117 @@ const App: React.FC = () => {
             onCancelEdit={() => { setEditingOrderId(null); setOrderNotes(''); setCart([]); }}
             orderNotes={orderNotes} onOrderNotesChange={setOrderNotes}
           />
+        ) : activeTab === 'totales' ? (
+          <div className="space-y-8 animate-in">
+            <div className="flex justify-between items-center bg-white/5 p-6 rounded-2xl border border-white/10">
+              <div>
+                <h2 className="text-xl font-black text-white tracking-widest uppercase mb-1">COMPILADO DE PEDIDOS</h2>
+                <p className="text-xs text-muted font-bold uppercase tracking-widest">Total acumulado de todos los pedidos pendientes</p>
+              </div>
+              <button 
+                onClick={() => window.print()} 
+                className="btn py-2 px-6 text-[10px] bg-primary/10 text-primary hover:bg-primary hover:text-white border border-primary/20 transition-all font-black tracking-widest flex items-center gap-2"
+              >
+                <FileUp size={14} /> IMPRIMIR LISTA
+              </button>
+            </div>
+
+            {(() => {
+              const aggregated: { [key: string]: any } = {};
+              orders.forEach(order => {
+                order.items.forEach(item => {
+                  if (['placed', 'visto', 'en_curso'].includes(item.status)) {
+                    const prod = products.find(p => p.id === item.product_id);
+                    if (!aggregated[item.product_id]) {
+                      aggregated[item.product_id] = {
+                        name: item.product_name,
+                        quantity: 0,
+                        code: prod?.code || 'N/A',
+                        product_id: item.product_id,
+                        cost: prod?.cost || 0,
+                        price: prod?.price || 0,
+                        stock: prod?.stock || 0,
+                        ordersCount: 0
+                      };
+                    }
+                    aggregated[item.product_id].quantity += item.quantity;
+                    aggregated[item.product_id].ordersCount += 1;
+                  }
+                });
+              });
+
+              const items = Object.values(aggregated).sort((a, b) => a.name.localeCompare(b.name));
+              const totalInvestment = items.reduce((acc, item) => acc + (item.cost * item.quantity), 0);
+
+              if (items.length === 0) {
+                return (
+                  <div className="glass-panel p-20 text-center border-dashed border-2 flex flex-col items-center gap-4">
+                    <div className="p-4 bg-white/5 rounded-full text-muted">
+                      <ClipboardList size={48} />
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold text-white/50">No hay pedidos pendientes para compilar</p>
+                      <p className="text-xs text-muted uppercase tracking-widest mt-1">Los pedidos aparecerán aquí cuando sean cargados por los empleados</p>
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-12 px-6 text-[10px] font-black text-muted uppercase tracking-widest mb-2">
+                    <div className="col-span-6">Producto / Referencia</div>
+                    <div className="col-span-2 text-center">Cantidad Total</div>
+                    <div className="col-span-2 text-center">Stock Actual</div>
+                    <div className="col-span-2 text-right">Inversión</div>
+                  </div>
+                  {items.map((item, idx) => (
+                    <div key={idx} className="modern-order-card p-6 hover:bg-white/[0.03] transition-all group">
+                      <div className="grid grid-cols-12 items-center">
+                        <div className="col-span-6 flex flex-col gap-1">
+                          <span className="text-sm font-bold text-white group-hover:text-primary transition-colors">{item.name}</span>
+                          <span className="text-[10px] text-muted font-mono bg-white/5 px-2 py-0.5 rounded border border-white/5 w-fit uppercase">REF: {item.code}</span>
+                        </div>
+                        <div className="col-span-2 flex justify-center">
+                          <div className="qty-badge w-10 h-10 border-2 border-primary/30">
+                            <span className="text-lg font-black">{item.quantity}</span>
+                          </div>
+                        </div>
+                        <div className="col-span-2 flex justify-center">
+                          <div className={`badge ${item.stock > 0 ? 'badge-on-stock' : 'badge-out-of-stock'} text-[9px] py-1 px-3`} style={{
+                            background: item.stock > 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                            color: item.stock > 0 ? '#10b981' : '#ef4444',
+                            border: `1px solid ${item.stock > 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
+                          }}>
+                            {item.stock > 0 ? `STOCK: ${Math.round(item.stock)}` : 'SIN STOCK'}
+                          </div>
+                        </div>
+                        <div className="col-span-2 text-right">
+                          <div className="text-[10px] text-muted font-bold uppercase mb-1">Subtotal Costo</div>
+                          <div className="text-lg font-black text-white">${(item.cost * item.quantity).toLocaleString()}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="mt-8 p-8 bg-primary/10 rounded-2xl border border-primary/20 flex justify-between items-center">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-primary/20 rounded-xl text-primary">
+                        <ShoppingBag size={24} />
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-primary-100 font-bold uppercase tracking-widest mb-1">Inversión Total Estimada</div>
+                        <div className="text-3xl font-black text-white leading-none">${totalInvestment.toLocaleString()}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-[10px] text-primary-100 font-bold uppercase tracking-widest mb-1">Ítems Diferentes</div>
+                      <div className="text-2xl font-black text-white">{items.length}</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
         ) : activeTab === 'stats' ? (
           <StatsDashboard orders={orders} products={products} />
         ) : (
@@ -1314,42 +1437,9 @@ const EmployeeDashboard: React.FC<{
                               <div className="text-[14px] font-bold text-white uppercase tracking-tight group-hover:text-primary transition-colors duration-200 whitespace-normal pr-6">
                                 {item.product_name}
                               </div>
-                              <div className="mt-2 space-y-2">
-                                <div className="flex flex-col gap-2">
-                                  <span className="text-[11px] text-muted font-mono bg-white/5 px-2 py-1 rounded border border-white/5 w-fit">REF: {products.find(p => p.id === item.product_id)?.code || 'N/A'}</span>
-                                  {(() => {
-                                    const prod = products.find(p => p.id === item.product_id);
-                                    return (
-                                      <div className="flex items-center gap-4 flex-wrap">
-                                        <div className={`badge ${(prod?.stock || 0) > 0 ? 'badge-on-stock' : 'badge-out-of-stock'} text-[9px] py-0.5 px-2 text-center w-fit`} style={{ 
-                                          background: (prod?.stock || 0) > 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                                          color: (prod?.stock || 0) > 0 ? '#10b981' : '#ef4444',
-                                          border: `1px solid ${(prod?.stock || 0) > 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
-                                        }}>
-                                          {(prod?.stock || 0) > 0 ? `STOCK: ${Math.round(prod?.stock || 0)}` : 'S/STOCK'}
-                                        </div>
-                                      </div>
-                                    );
-                                  })()}
-                                </div>
-                              </div>
+                              <div className="mt-2" />
 
-                              {/* DETECCIÓN DE DUPLICADOS EN OTROS PEDIDOS (Empleado) */}
-                              {(() => {
-                                const others = orders.filter(o => 
-                                  o.id !== order.id && 
-                                  o.items.some(i => i.product_id === item.product_id && ['placed', 'visto', 'en_curso', 'bought'].includes(i.status))
-                                );
-                                if (others.length > 0) {
-                                  return (
-                                    <div className="duplicate-item-warning animate-in">
-                                      <ShoppingBag size={12} />
-                                      <span>También solicitado en: {others.map(o => `#${o.order_number || o.id.slice(0, 4)}`).join(', ')}</span>
-                                    </div>
-                                  );
-                                }
-                                return null;
-                              })()}
+
                             </div>
 
                             {/* NOTA DE CANCELACIÓN (MEDIO, ANTES DEL ESTADO) */}
