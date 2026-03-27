@@ -1260,6 +1260,23 @@ const EmployeeDashboard: React.FC<{
                               <div className="text-[11px] text-muted font-mono mt-2 opacity-70 flex items-center gap-2">
                                 <span className="bg-white/5 px-2 py-1 rounded border border-white/5">REF: {products.find(p => p.id === item.product_id)?.code || 'N/A'}</span>
                               </div>
+
+                              {/* DETECCIÓN DE DUPLICADOS EN OTROS PEDIDOS (Empleado) */}
+                              {(() => {
+                                const others = orders.filter(o => 
+                                  o.id !== order.id && 
+                                  o.items.some(i => i.product_id === item.product_id && ['placed', 'visto', 'en_curso', 'bought'].includes(i.status))
+                                );
+                                if (others.length > 0) {
+                                  return (
+                                    <div className="duplicate-item-warning animate-in">
+                                      <ShoppingBag size={12} />
+                                      <span>También solicitado en: {others.map(o => `#${o.order_number || o.id.slice(0, 4)}`).join(', ')}</span>
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              })()}
                             </div>
 
                             {/* NOTA DE CANCELACIÓN (MEDIO, ANTES DEL ESTADO) */}
