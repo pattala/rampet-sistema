@@ -26,6 +26,7 @@ export interface OrderItem {
   status: OrderItemStatus;
   estimated_date?: string;
   cancellation_note?: string;
+  admin_note?: string;
 }
 
 export interface Order {

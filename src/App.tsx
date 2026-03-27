@@ -43,6 +43,15 @@ const App: React.FC = () => {
     onConfirm?: () => void;
     confirmText?: string;
   }>({ isOpen: false, type: 'alert', title: '', message: '' });
+  const [noteModal, setNoteModal] = useState<{
+    isOpen: boolean;
+    order: Order | null;
+    itemId: string | null;
+    status: OrderItemStatus | null;
+    title: string;
+    estimatedDate?: string;
+  }>({ isOpen: false, order: null, itemId: null, status: null, title: '' });
+  const [tempNote, setTempNote] = useState('');
 
   useEffect(() => {
     if (role) {
@@ -299,9 +308,9 @@ const App: React.FC = () => {
     setIsSubmitting(false);
   };
 
-  const handleUpdateItemStatus = async (order: Order, itemId: string, status: OrderItemStatus, estimatedDate?: string, cancellationNote?: string) => {
+  const handleUpdateItemStatus = async (order: Order, itemId: string, status: OrderItemStatus, estimatedDate?: string, cancellationNote?: string, adminNote?: string) => {
     const updatedItems = order.items.map(i => 
-      i.id === itemId ? { ...i, status, estimated_date: estimatedDate, cancellation_note: cancellationNote } : i
+      i.id === itemId ? { ...i, status, estimated_date: estimatedDate, cancellation_note: cancellationNote, admin_note: adminNote } : i
     );
     
     // UI Update Optimistic
@@ -514,6 +523,7 @@ const App: React.FC = () => {
             setDateModal={setDateModal}
             setTempDate={setTempDate}
             setCancelItemModal={setCancelItemModal}
+            setNoteModal={setNoteModal}
           />
         )}
       </main>
@@ -558,6 +568,52 @@ const App: React.FC = () => {
                 className="btn flex-1 text-white text-sm font-bold shadow-lg bg-primary hover:bg-primary-hover shadow-primary/20"
               >
                 Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE NOTA GENÉRICA (ADMIN) */}
+      {noteModal.isOpen && (
+        <div className="modal-backdrop z-[1000]" onClick={() => setNoteModal(prev => ({ ...prev, isOpen: false }))}>
+          <div className="modal-content-glass max-w-sm" onClick={e => e.stopPropagation()}>
+            <div className="flex flex-col items-center text-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-primary/20 text-primary flex items-center justify-center mb-4">
+                <ClipboardList size={32} />
+              </div>
+              <h3 className="text-xl font-black text-white uppercase tracking-widest mb-2">{noteModal.title}</h3>
+              <p className="text-[10px] text-muted uppercase tracking-[0.2em]">Agregar nota informativa</p>
+            </div>
+            
+            <div className="w-full mb-6">
+              <textarea 
+                className="w-full bg-black/20 border border-white/10 rounded-xl p-4 text-white text-sm focus:border-primary/50 outline-none transition-all placeholder:text-white/20 min-h-[100px] resize-none"
+                placeholder="Escribe una nota para el colaborador..."
+                value={tempNote}
+                onChange={(e) => setTempNote(e.target.value)}
+                autoFocus
+              />
+            </div>
+
+            <div className="flex gap-4 w-full">
+              <button 
+                onClick={() => setNoteModal(prev => ({ ...prev, isOpen: false }))}
+                className="btn flex-1 border border-glass-border hover:bg-white/5 text-xs font-bold uppercase tracking-widest text-muted"
+              >
+                Omitir
+              </button>
+              <button 
+                onClick={() => {
+                  if (noteModal.order && noteModal.itemId && noteModal.status) {
+                    handleUpdateItemStatus(noteModal.order, noteModal.itemId, noteModal.status, noteModal.estimatedDate, undefined, tempNote);
+                    setNoteModal(prev => ({ ...prev, isOpen: false, estimatedDate: undefined }));
+                    setTempNote('');
+                  }
+                }}
+                className="btn flex-1 bg-primary text-white text-xs font-black tracking-widest shadow-lg shadow-primary/20"
+              >
+                CONFIRMAR
               </button>
             </div>
           </div>
@@ -1302,6 +1358,14 @@ const EmployeeDashboard: React.FC<{
                                 <span className="text-[11px] italic text-red-100 font-medium whitespace-pre-wrap leading-tight">{item.cancellation_note}</span>
                               </div>
                             )}
+
+                            {item.admin_note && (
+                              <div className="bg-primary/10 py-2 px-3 rounded-lg border border-primary/20 max-w-[250px] animate-in flex items-start gap-2 mr-4 hidden sm:flex">
+                                <FileUp size={14} className="text-primary shrink-0 mt-0.5" />
+                                <span className="text-[11px] italic text-primary-100 font-medium whitespace-pre-wrap leading-tight">{item.admin_note}</span>
+                              </div>
+                            )}
+
                             <div className="flex items-center gap-6">
                               <div className="status-col-fixed">
                                 <div className={`item-status-badge relative item-status-${item.status}`}>
@@ -1440,13 +1504,15 @@ const AdminDashboard: React.FC<{
   orders: Order[]; products: Product[]; onUpdateStatus: (id: string, s: OrderStatus, d?: string) => void;
   onClearProducts: () => void;
   onBuyItem: (order: Order, item: OrderItem) => void;
-  onUpdateItemStatus: (order: Order, itemId: string, s: OrderItemStatus, d?: string) => void;
+  onUpdateItemStatus: (order: Order, itemId: string, s: OrderItemStatus, d?: string, n?: string, an?: string) => void;
   activeTab: OrderStatus;
   isSubmitting: boolean;
   setDateModal: React.Dispatch<React.SetStateAction<{ isOpen: boolean; title: string; onConfirm: (date: string) => void; }>>;
   setTempDate: (d: string) => void;
   setCancelItemModal: React.Dispatch<React.SetStateAction<{ isOpen: boolean; order: Order | null; itemId: string | null; note: string; }>>;
-}> = ({ orders, products, onUpdateStatus, onClearProducts, onBuyItem, onUpdateItemStatus, activeTab, isSubmitting, setDateModal, setTempDate, setCancelItemModal }) => {
+  setNoteModal: React.Dispatch<React.SetStateAction<{ isOpen: boolean; order: Order | null; itemId: string | null; status: OrderItemStatus | null; title: string; estimatedDate?: string; }>>;
+}> = ({ orders, products, onUpdateStatus, onClearProducts, onBuyItem, onUpdateItemStatus, activeTab, isSubmitting, setDateModal, setTempDate, setCancelItemModal, setNoteModal }) => {
+  const [shouldAddNote, setShouldAddNote] = useState(false);
   const filteredOrders = orders.filter(o => {
     const isSalesTab = activeTab === 'pending';
     const isPurchasesTab = activeTab === 'bought';
@@ -1477,7 +1543,21 @@ const AdminDashboard: React.FC<{
             </div>
           )}
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-4 items-center">
+          <label className="flex items-center gap-2 cursor-pointer group">
+            <div className="relative">
+              <input 
+                type="checkbox" 
+                className="sr-only peer" 
+                checked={shouldAddNote}
+                onChange={(e) => setShouldAddNote(e.target.checked)}
+              />
+              <div className="w-10 h-5 bg-white/10 rounded-full peer peer-checked:bg-primary transition-all border border-white/10"></div>
+              <div className="absolute left-1 top-1 w-3 h-3 bg-white rounded-full peer-checked:translate-x-5 transition-transform shadow-lg"></div>
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted group-hover:text-white transition-colors">Adjuntar nota</span>
+          </label>
+          <div className="w-px h-8 bg-white/5 mx-2" />
           <button 
             onClick={onClearProducts}
             className="btn py-2 px-6 text-[10px] bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/20 transition-all font-black tracking-widest"
@@ -1590,11 +1670,17 @@ const AdminDashboard: React.FC<{
                             })()}
                           </div>
 
-                          {/* NOTA DE CANCELACIÓN (MEDIO, ANTES DEL ESTADO) */}
                           {item.status === 'anulado' && item.cancellation_note && (
                             <div className="bg-red-500/10 py-2 px-3 rounded-lg border border-red-500/20 max-w-[250px] animate-in flex items-start gap-2 mr-4 hidden sm:flex">
                               <ClipboardList size={14} className="text-red-500 shrink-0 mt-0.5" />
                               <span className="text-[11px] italic text-red-100 font-medium whitespace-pre-wrap leading-tight">{item.cancellation_note}</span>
+                            </div>
+                          )}
+
+                          {item.admin_note && (
+                            <div className="bg-primary/10 py-2 px-3 rounded-lg border border-primary/20 max-w-[250px] animate-in flex items-start gap-2 mr-4 hidden sm:flex">
+                              <FileUp size={14} className="text-primary shrink-0 mt-0.5" />
+                              <span className="text-[11px] italic text-primary-100 font-medium whitespace-pre-wrap leading-tight">{item.admin_note}</span>
                             </div>
                           )}
 
@@ -1668,7 +1754,13 @@ const AdminDashboard: React.FC<{
                             {activeTab === 'pending' && (
                               <div className="flex items-center gap-2 pl-4 border-l border-white/5 ml-2">
                                 <button 
-                                  onClick={() => onUpdateItemStatus(order, item.id, 'visto')}
+                                  onClick={() => {
+                                    if (shouldAddNote) {
+                                      setNoteModal({ isOpen: true, order, itemId: item.id, status: 'visto', title: 'Marcar como Visto' });
+                                    } else {
+                                      onUpdateItemStatus(order, item.id, 'visto');
+                                    }
+                                  }}
                                   className="action-icon-refined action-blue"
                                   title="Marcar como Visto"
                                 >
@@ -1680,7 +1772,13 @@ const AdminDashboard: React.FC<{
                                     setDateModal({
                                       isOpen: true,
                                       title: 'Programar Compra',
-                                      onConfirm: (d) => onUpdateItemStatus(order, item.id, 'en_curso', d)
+                                      onConfirm: (d) => {
+                                        if (shouldAddNote) {
+                                          setNoteModal({ isOpen: true, order, itemId: item.id, status: 'en_curso', title: 'Programar Compra', estimatedDate: d });
+                                        } else {
+                                          onUpdateItemStatus(order, item.id, 'en_curso', d);
+                                        }
+                                      }
                                     });
                                   }}
                                   className="action-icon-refined action-amber"
@@ -1689,7 +1787,13 @@ const AdminDashboard: React.FC<{
                                   <Clock size={18} />
                                 </button>
                                 <button 
-                                  onClick={() => onBuyItem(order, item)}
+                                  onClick={() => {
+                                    if (shouldAddNote) {
+                                      setNoteModal({ isOpen: true, order, itemId: item.id, status: 'bought', title: 'Marcar como Comprado' });
+                                    } else {
+                                      onBuyItem(order, item);
+                                    }
+                                  }}
                                   disabled={isSubmitting || item.status === 'anulado'}
                                   className="action-icon-refined action-green disabled:opacity-50 disabled:cursor-not-allowed"
                                   title="Comprar este artículo"
