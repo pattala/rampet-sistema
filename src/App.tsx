@@ -1262,7 +1262,6 @@ const EmployeeDashboard: React.FC<{
                                   <span className="text-[11px] text-muted font-mono bg-white/5 px-2 py-1 rounded border border-white/5 w-fit">REF: {products.find(p => p.id === item.product_id)?.code || 'N/A'}</span>
                                   {(() => {
                                     const prod = products.find(p => p.id === item.product_id);
-                                    const itemCost = (prod?.cost || 0) * item.quantity;
                                     return (
                                       <div className="flex items-center gap-4 flex-wrap">
                                         <div className={`badge ${(prod?.stock || 0) > 0 ? 'badge-on-stock' : 'badge-out-of-stock'} text-[9px] py-0.5 px-2 text-center w-fit`} style={{ 
@@ -1272,8 +1271,6 @@ const EmployeeDashboard: React.FC<{
                                         }}>
                                           {(prod?.stock || 0) > 0 ? `STOCK: ${Math.round(prod?.stock || 0)}` : 'S/STOCK'}
                                         </div>
-                                        <span className="text-[11px] text-accent-warning font-bold uppercase tracking-widest">Costo: ${itemCost.toLocaleString()}</span>
-                                        <span className="text-[11px] text-accent-success font-bold uppercase tracking-widest">PVP: ${((prod?.price || 0) * item.quantity).toLocaleString()}</span>
                                       </div>
                                     );
                                   })()}
