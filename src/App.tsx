@@ -1522,8 +1522,11 @@ const AdminDashboard: React.FC<{
                                     Producto Manual
                                   </span>
                                 ) : (
-                                  <span className="text-[11px] text-muted font-mono bg-white/5 px-2 py-0.5 rounded border border-white/5">REF: {prod?.code || 'N/A'}</span>
+                                 <span className="text-[11px] text-muted font-mono bg-white/5 px-2 py-0.5 rounded border border-white/5">REF: {prod?.code || 'N/A'}</span>
                                 )}
+                                <span className={`text-[11px] font-bold uppercase tracking-widest ${(prod?.stock || 0) > 0 ? 'text-accent-success/80' : 'text-red-500/80'}`}>
+                                   Stock: {prod?.stock !== undefined ? Math.round(prod.stock) : '0'}
+                                </span>
                                 <span className="text-[11px] text-accent-warning font-bold uppercase tracking-widest">Costo: ${itemCost.toLocaleString()}</span>
                                 <span className="text-[11px] text-accent-success font-bold uppercase tracking-widest">PVP: ${((prod?.price || 0) * item.quantity).toLocaleString()}</span>
                              </div>
