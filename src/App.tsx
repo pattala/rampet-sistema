@@ -1516,25 +1516,27 @@ const AdminDashboard: React.FC<{
                             <div className="text-[14px] font-bold text-white uppercase tracking-tight group-hover:text-primary transition-colors duration-200 whitespace-normal pr-6">
                               {item.product_name}
                             </div>
-                             <div className="flex flex-wrap items-center gap-2 sm:gap-6 mt-2">
+                             <div className="mt-2 space-y-2">
                                 {item.product_id.startsWith('manual-') ? (
                                   <span className="text-[9px] font-black bg-primary/20 text-primary border border-primary/30 px-2 py-0.5 rounded-full uppercase tracking-widest">
                                     Producto Manual
                                   </span>
                                 ) : (
-                                  <div className="flex flex-col gap-1.5 min-w-[90px]">
+                                  <div className="flex flex-col gap-2">
                                     <span className="text-[11px] text-muted font-mono bg-white/5 px-2 py-0.5 rounded border border-white/5 w-fit">REF: {prod?.code || 'N/A'}</span>
-                                    <div className={`badge ${(prod?.stock || 0) > 0 ? 'badge-on-stock' : 'badge-out-of-stock'} text-[9px] py-0.5 px-2 text-center w-fit`} style={{ 
-                                      background: (prod?.stock || 0) > 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                                      color: (prod?.stock || 0) > 0 ? '#10b981' : '#ef4444',
-                                      border: `1px solid ${(prod?.stock || 0) > 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
-                                    }}>
-                                      {(prod?.stock || 0) > 0 ? `STOCK: ${Math.round(prod?.stock || 0)}` : 'S/STOCK'}
+                                    <div className="flex items-center gap-4 flex-wrap">
+                                      <div className={`badge ${(prod?.stock || 0) > 0 ? 'badge-on-stock' : 'badge-out-of-stock'} text-[9px] py-0.5 px-2 text-center w-fit`} style={{ 
+                                        background: (prod?.stock || 0) > 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                                        color: (prod?.stock || 0) > 0 ? '#10b981' : '#ef4444',
+                                        border: `1px solid ${(prod?.stock || 0) > 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
+                                      }}>
+                                        {(prod?.stock || 0) > 0 ? `STOCK: ${Math.round(prod?.stock || 0)}` : 'S/STOCK'}
+                                      </div>
+                                      <span className="text-[11px] text-accent-warning font-bold uppercase tracking-widest">Costo: ${itemCost.toLocaleString()}</span>
+                                      <span className="text-[11px] text-accent-success font-bold uppercase tracking-widest">PVP: ${((prod?.price || 0) * item.quantity).toLocaleString()}</span>
                                     </div>
                                   </div>
                                 )}
-                                <span className="text-[11px] text-accent-warning font-bold uppercase tracking-widest">Costo: ${itemCost.toLocaleString()}</span>
-                                <span className="text-[11px] text-accent-success font-bold uppercase tracking-widest">PVP: ${((prod?.price || 0) * item.quantity).toLocaleString()}</span>
                              </div>
 
                             {/* DETECCIÓN DE DUPLICADOS EN OTROS PEDIDOS (Admin) */}
