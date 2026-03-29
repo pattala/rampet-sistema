@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Clock, ChevronDown, ChevronUp, Barcode, AlertCircle, MoreHorizontal, Check, Calendar, ShoppingCart, Trash2, Edit3 } from 'lucide-react';
+import { Clock, ChevronDown, ChevronUp, Barcode, AlertCircle, Check, Calendar, ShoppingCart, Trash2, Edit3 } from 'lucide-react';
 import type { Order, OrderStatus, OrderItemStatus, OrderItem, Product } from '../types';
 
 interface MobileAdminOrderCardProps {
