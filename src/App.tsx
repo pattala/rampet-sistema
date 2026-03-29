@@ -69,6 +69,14 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
+    if (isMobile) {
+      document.documentElement.classList.add('is-mobile');
+    } else {
+      document.documentElement.classList.remove('is-mobile');
+    }
+  }, [isMobile]);
+
+  useEffect(() => {
     if (role) {
       localStorage.setItem('vidal_role', role);
     } else {

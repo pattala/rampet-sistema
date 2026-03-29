@@ -16,29 +16,25 @@ interface MobileAdminOrderCardProps {
 }
 
 export const MobileAdminOrderCard: React.FC<MobileAdminOrderCardProps> = ({ 
-  order, totalCost, products, allOrders, onUpdateStatus, onUpdateItemStatus, onBuyItem, setDateModal, setTempDate, setNoteModal
+  order, products, allOrders, onUpdateStatus, onUpdateItemStatus, onBuyItem, setDateModal, setTempDate, setNoteModal
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <div className="modern-order-card p-4 mb-6 animate-in border border-white/10 shadow-2xl relative overflow-visible">
-      {/* CABECERA DE ORDEN */}
-      <div className="flex justify-between items-start mb-4">
+    <div className="modern-order-card p-4 mb-6 animate-in border border-white/10 shadow-2xl relative overflow-visible bg-slate-900/40 backdrop-blur-xl">
+      {/* CABECERA DE ORDEN SIMPLIFICADA */}
+      <div className="flex justify-between items-center mb-4">
         <div onClick={() => setIsExpanded(!isExpanded)} className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-sm font-black text-primary tracking-tighter">ORDEN #{order.order_number || order.id.slice(0, 8)}</span>
             {order.is_modified && (
-              <span className="text-[7px] font-black bg-accent-warning text-black px-1.5 py-0.5 rounded-sm uppercase">MODIFICADA</span>
+              <span className="text-[7px] font-black bg-accent-warning text-black px-1.5 py-0.5 rounded-sm uppercase">MOD</span>
             )}
           </div>
           <div className="flex items-center gap-2 text-[10px] text-muted font-bold uppercase tracking-widest">
             <Clock size={12} className="text-primary" />
             {new Date(order.created_at).toLocaleDateString()}
           </div>
-        </div>
-        <div className="text-right">
-          <div className="text-xl font-black text-white leading-none">${totalCost.toLocaleString()}</div>
-          <div className="text-[8px] text-primary font-black uppercase tracking-widest mt-1">TOTAL INVERSIÓN</div>
         </div>
       </div>
 
@@ -97,16 +93,20 @@ export const MobileAdminOrderCard: React.FC<MobileAdminOrderCardProps> = ({
                    </div>
                 </div>
 
-                {/* ALERTA DE DUPLICADOS (FONDO SÓLIDO) */}
+                {/* ALERTA DE DUPLICADOS (COMO EN PC) */}
                 {duplicates.length > 0 && (
-                  <div className="bg-[#fbbf24] p-4 rounded-2xl mb-5 ml-2 shadow-xl border-l-4 border-black animate-pulse">
-                    <div className="flex items-center gap-2 mb-1">
-                       <AlertCircle size={18} className="text-black" />
-                       <span className="text-[11px] font-black text-black uppercase tracking-tight">Repetido en otros pedidos:</span>
-                    </div>
-                    <div className="text-[13px] font-black text-black ml-7 underline tracking-tighter">
-                       {duplicates.map(o => `#${o.order_number || o.id.slice(0, 4)}`).join(', ')}
-                    </div>
+                  <div className="bg-[#fbbf24] p-4 rounded-xl mb-5 ml-2 shadow-xl flex items-start gap-3 border-l-4 border-black">
+                     <AlertCircle size={20} className="text-black shrink-0 mt-0.5" />
+                     <div className="flex-1">
+                        <span className="text-[11px] font-black text-black uppercase block leading-none mb-1">PRODUCTO REPETIDO EN OTROS PEDIDOS:</span>
+                        <div className="flex flex-wrap gap-1">
+                           {duplicates.map((o, index) => (
+                             <span key={index} className="text-[14px] font-black text-black underline">
+                               #{o.order_number || o.id.slice(0, 4)}{index < duplicates.length - 1 ? ',' : ''}
+                             </span>
+                           ))}
+                        </div>
+                     </div>
                   </div>
                 )}
 
@@ -117,13 +117,13 @@ export const MobileAdminOrderCard: React.FC<MobileAdminOrderCardProps> = ({
                   </div>
                 )}
                 
-                {/* GRILLA DE ACCIONES DIRECTAS 2x2 */}
+                {/* GRILLA DE ACCIONES DIRECTAS 2x2 (HORIZONTALES) */}
                 <div className="grid grid-cols-2 gap-3 pt-2 ml-2">
                   <button 
                     onClick={() => onUpdateItemStatus(order, item.id, 'visto')}
-                    className="btn btn-vivid-blue py-4 rounded-2xl text-[10px] font-black uppercase shadow-lg flex flex-col items-center gap-1"
+                    className="btn btn-vivid-blue flex items-center justify-center gap-2 py-3.5 rounded-2xl text-[10px] font-black uppercase shadow-lg"
                   >
-                    <Check size={18} /> VISTO
+                    <Check size={16} /> VISTO
                   </button>
                   <button 
                     onClick={() => {
@@ -134,25 +134,25 @@ export const MobileAdminOrderCard: React.FC<MobileAdminOrderCardProps> = ({
                         onConfirm: (d: string) => onUpdateItemStatus(order, item.id, 'en_curso', d)
                       });
                     }}
-                    className="btn btn-vivid-amber py-4 rounded-2xl text-[10px] font-black uppercase shadow-lg flex flex-col items-center gap-1"
+                    className="btn btn-vivid-amber flex items-center justify-center gap-2 py-3.5 rounded-2xl text-[10px] font-black uppercase shadow-lg"
                   >
-                    <Calendar size={18} /> PROG.
+                    <Calendar size={16} /> PROG.
                   </button>
                   <button 
                     onClick={() => onBuyItem(order, item)}
-                    className="btn btn-vivid-green py-4 rounded-2xl text-[10px] font-black uppercase shadow-lg flex flex-col items-center gap-1"
+                    className="btn btn-vivid-green flex items-center justify-center gap-2 py-3.5 rounded-2xl text-[10px] font-black uppercase shadow-lg"
                   >
-                    <ShoppingCart size={18} /> COMPRA
+                    <ShoppingCart size={16} /> COMPRA
                   </button>
                   <button 
                     onClick={() => onUpdateItemStatus(order, item.id, 'anulado')}
-                    className="btn btn-vivid-red py-4 rounded-2xl text-[10px] font-black uppercase shadow-lg flex flex-col items-center gap-1"
+                    className="btn btn-vivid-red flex items-center justify-center gap-2 py-3.5 rounded-2xl text-[10px] font-black uppercase shadow-lg"
                   >
-                    <Trash2 size={18} /> ANULAR
+                    <Trash2 size={16} /> ANULAR
                   </button>
                   <button 
                     onClick={() => setNoteModal({ isOpen: true, order, itemId: item.id, status: item.status, title: 'Nota Ítem' })}
-                    className="col-span-2 bg-white/10 text-white py-3.5 rounded-2xl text-[10px] font-black uppercase flex items-center justify-center gap-3 border border-white/20 mt-1"
+                    className="col-span-2 bg-white/10 text-white py-3 rounded-2xl text-[10px] font-black uppercase flex items-center justify-center gap-3 border border-white/20 mt-1"
                   >
                     <Edit3 size={16} /> NOTA AL ÍTEM
                   </button>
