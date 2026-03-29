@@ -489,7 +489,7 @@ const App: React.FC = () => {
       <main className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8">
         {/* Role-Specific Tabs Navigation */}
         {!isMobile && (
-          <div className="tabs-container desktop-tabs-nav">
+          <div id="desktop-nav-header" className="tabs-container desktop-tabs-nav">
             {(role === 'employee' 
               ? [
                   { id: 'pending', label: 'NUEVO PEDIDO', icon: <Plus size={16} /> },
