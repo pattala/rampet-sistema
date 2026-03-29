@@ -455,10 +455,10 @@ const App: React.FC = () => {
             {authRole === 'admin' && (
               <button 
                 onClick={() => setRole(null)} 
-                className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:text-white px-2 sm:px-3 py-2 rounded-lg border border-primary/20 hover:bg-primary/20 transition-all mx-1 sm:mx-2"
+                className={`flex items-center gap-2 text-[11px] font-black uppercase tracking-tighter text-emerald-400 hover:text-white px-4 py-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 shadow-lg shadow-emerald-500/5 transition-all ${isMobile ? 'mx-1' : 'mx-2'}`}
               >
-                <span className="hidden sm:inline">Cambiar Vista</span>
-                <span className="sm:hidden">VISTA</span>
+                <motion.div animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} className="w-1.5 h-1.5 bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                <span>{isMobile ? 'MODO PC' : 'CAMBIAR VISTA'}</span>
               </button>
             )}
             {isMobile && (
@@ -1795,6 +1795,8 @@ const AdminDashboard: React.FC<{
                   key={order.id}
                   order={order}
                   totalCost={totalCost}
+                  products={products}
+                  allOrders={orders}
                   onUpdateStatus={onUpdateStatus}
                   onUpdateItemStatus={onUpdateItemStatus}
                   onBuyItem={onBuyItem}
