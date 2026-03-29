@@ -500,7 +500,7 @@ const App: React.FC = () => {
       )}
 
       {/* HEADER LIMPIO (Logo + Perfil + Hamburguesa) */}
-      <header className={`glass-panel rounded-none border-x-0 border-t-0 p-4 sticky top-0 z-[60] transition-all bg-slate-900/95 backdrop-blur-3xl shadow-2xl ${isMobile ? 'pt-24 pb-6' : ''}`}>
+      <header className={`glass-panel rounded-none border-x-0 border-t-0 p-4 sticky top-0 z-[60] transition-all bg-[#050b1a] backdrop-blur-3xl shadow-2xl ${isMobile ? 'pt-24 pb-6' : ''}`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-3">
             {(isMobile || hookIsMobile) && (
@@ -514,12 +514,17 @@ const App: React.FC = () => {
                  <div className="w-6 h-1 bg-black rounded-full" />
               </button>
             )}
-            <div className="bg-white rounded-lg flex items-center justify-center p-1 shadow-lg shrink-0 overflow-hidden" style={{ width: '80px', height: '40px' }}>
-              <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+            <div className="flex flex-col items-start gap-1">
+              <div className="flex items-center gap-2">
+                <div className="bg-white rounded-lg flex items-center justify-center p-1 shadow-lg shrink-0 overflow-hidden" style={{ width: '80px', height: '40px' }}>
+                  <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+                </div>
+                <span id="debug-header-dashboard" className="font-black text-xl tracking-tighter text-white">
+                  RAMPET <span className="hidden sm:inline">SISTEMA</span>
+                </span>
+              </div>
+              <span className="text-[10px] font-black bg-indigo-500 text-white px-2 py-0.5 rounded-full shadow-lg">VERSIÓN 4.2</span>
             </div>
-            <span id="debug-header-dashboard" className="font-black text-xl tracking-tighter text-white">
-              RAMPET <span className="hidden sm:inline">SISTEMA</span>
-            </span>
           </div>
 
           <div className="flex items-center gap-4">
