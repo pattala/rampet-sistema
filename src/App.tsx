@@ -523,7 +523,10 @@ const App: React.FC = () => {
                   RAMPET <span className="hidden sm:inline">SISTEMA</span>
                 </span>
               </div>
-              <span className="text-[10px] font-black bg-indigo-500 text-white px-2 py-0.5 rounded-full shadow-lg">VERSIÓN 4.2</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black bg-indigo-500 text-white px-2 py-0.5 rounded-full shadow-lg">VERSIÓN 4.3</span>
+                <span className="text-[8px] text-indigo-300 font-bold uppercase tracking-widest animate-pulse">Update Forced</span>
+              </div>
             </div>
           </div>
 

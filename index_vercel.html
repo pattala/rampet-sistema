@@ -8,21 +8,18 @@
     <link rel="manifest" href="/manifest.json" />
     <title>RAMPET SISTEMA DE PEDIDOS</title>
     <script>
-      // VERSIÓN NUCLEAR 4.3: Forzar limpieza de Service Workers
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(function(registrations) {
           for(let registration of registrations) {
-            registration.unregister().then(function() {
-              console.log('SW Unregistered Success');
-              // window.location.reload(true); // Opcional: recarga forzada
-            });
+            registration.unregister();
           }
         });
       }
     </script>
+    <script type="module" crossorigin src="/assets/index-DZbXlySz.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-Dgi0-e3o.css">
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
