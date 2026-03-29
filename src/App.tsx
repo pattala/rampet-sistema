@@ -4,6 +4,10 @@ import { motion } from 'framer-motion';
 import { supabase } from './supabaseClient';
 import type { Order, Product, UserRole, OrderStatus, OrderItem, OrderItemStatus } from './types';
 import { AuthScreen } from './components/AuthScreen';
+import { useIsMobile } from './hooks/useIsMobile';
+import { MobileBottomNav } from './components/MobileBottomNav';
+import { MobileCartDrawer } from './components/MobileCartDrawer';
+import { MobileAdminOrderCard } from './components/MobileAdminOrderCard';
 
 const isSupabaseConfigured = !!supabase;
 
@@ -12,6 +16,7 @@ const App: React.FC = () => {
   const [role, setRole] = useState<UserRole | null>(null);
   const [session, setSession] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const isMobile = useIsMobile();
   // Manual trigger for Vercel deploy: 2026-03-27-02-21 
   const [products, setProducts] = useState<Product[]>([]);
   const [activeTab, setActiveTab] = useState<OrderStatus | 'stats' | 'totales'>(() => {
@@ -443,81 +448,84 @@ const App: React.FC = () => {
       </header>
       <main className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8">
         {/* Role-Specific Tabs Navigation */}
-        <div className="tabs-container">
-          {(role === 'employee' 
-            ? [
-                { id: 'pending', label: 'NUEVO PEDIDO', icon: <Plus size={16} /> },
-                { id: 'placed', label: 'MIS PEDIDOS', icon: <Package size={16} /> },
-                { id: 'arriving', label: 'RECEPCIÓN', icon: <Truck size={16} /> },
-                { id: 'received', label: 'HISTORIAL', icon: <CheckCircle size={16} /> }
-              ]
-            : [
-                { id: 'pending', label: 'PEDIDOS', icon: <Plus size={16} /> },
-                { id: 'totales', label: 'TOTALES', icon: <ClipboardList size={16} /> },
-                { id: 'bought', label: 'COMPRAS', icon: <ShoppingBag size={16} /> },
-                { id: 'arriving', label: 'RECEPCIÓN', icon: <Truck size={16} /> },
-                { id: 'received', label: 'HISTORIAL', icon: <CheckCircle size={16} /> },
-                { id: 'stats', label: 'ESTADÍSTICAS', icon: <BarChart2 size={16} /> }
-              ]
-          ).map(tab => {
-            // For 'totales' we need a different calculation (unique products)
-            let count = 0;
-            if (role === 'admin' && tab.id === 'totales') {
-              const uniquePendingProducts = new Set(
-                orders.flatMap(o => o.items)
-                  .filter(i => ['placed', 'visto', 'en_curso'].includes(i.status))
-                  .map(i => i.product_id)
+        {!isMobile && (
+          <div className="tabs-container">
+            {(role === 'employee' 
+              ? [
+                  { id: 'pending', label: 'NUEVO PEDIDO', icon: <Plus size={16} /> },
+                  { id: 'placed', label: 'MIS PEDIDOS', icon: <Package size={16} /> },
+                  { id: 'arriving', label: 'RECEPCIÓN', icon: <Truck size={16} /> },
+                  { id: 'received', label: 'HISTORIAL', icon: <CheckCircle size={16} /> }
+                ]
+              : [
+                  { id: 'pending', label: 'PEDIDOS', icon: <Plus size={16} /> },
+                  { id: 'totales', label: 'TOTALES', icon: <ClipboardList size={16} /> },
+                  { id: 'bought', label: 'COMPRAS', icon: <ShoppingBag size={16} /> },
+                  { id: 'arriving', label: 'RECEPCIÓN', icon: <Truck size={16} /> },
+                  { id: 'received', label: 'HISTORIAL', icon: <CheckCircle size={16} /> },
+                  { id: 'stats', label: 'ESTADÍSTICAS', icon: <BarChart2 size={16} /> }
+                ]
+            ).map(tab => {
+              // For 'totales' we need a different calculation (unique products)
+              let count = 0;
+              if (role === 'admin' && tab.id === 'totales') {
+                const uniquePendingProducts = new Set(
+                  orders.flatMap(o => o.items)
+                    .filter(i => ['placed', 'visto', 'en_curso'].includes(i.status))
+                    .map(i => i.product_id)
+                );
+                count = uniquePendingProducts.size;
+              } else {
+                count = orders.filter(o => {
+                  const isEmployee = role === 'employee';
+                  if (isEmployee) {
+                    if (tab.id === 'placed') return o.items.some(i => ['placed', 'visto', 'en_curso'].includes(i.status));
+                    if (tab.id === 'arriving') return o.items.some(i => i.status === 'bought');
+                    if (tab.id === 'received') return o.items.some(i => i.status === 'received');
+                  } else {
+                    if (tab.id === 'pending') return o.items.some(i => ['placed', 'visto', 'en_curso'].includes(i.status));
+                    if (tab.id === 'bought') return o.items.some(i => i.status === 'bought');
+                    if (tab.id === 'arriving') return o.items.some(i => i.status === 'bought');
+                    if (tab.id === 'received') return o.items.some(i => i.status === 'received');
+                  }
+                  return false;
+                }).length;
+              }
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as OrderStatus)}
+                  className={`nav-tab ${isActive ? 'nav-tab-active' : ''}`}
+                >
+                  <div className="flex items-center gap-2 relative">
+                    {tab.icon}
+                    {tab.label}
+                    {count > 0 && (
+                      <span className={`px-2 py-0.5 rounded-lg text-[9px] min-w-[20px] text-center font-black ${isActive ? 'bg-primary text-white' : 'bg-white/10 text-muted'}`}>
+                        {count}
+                      </span>
+                    )}
+                    {(() => {
+                      const isNewAdmin = role === 'admin' && tab.id === 'pending' && orders.some(o => o.items.some(i => i.status === 'placed'));
+                      const isNewEmployee = role === 'employee' && tab.id === 'arriving' && orders.some(o => o.items.some(i => i.status === 'bought'));
+                      const isUpdatedEmployee = role === 'employee' && tab.id === 'placed' && orders.some(o => o.items.some(i => ['visto', 'en_curso', 'anulado'].includes(i.status)));
+                      
+                      if (isNewAdmin || isNewEmployee || isUpdatedEmployee) {
+                        return <div className="notification-dot animate-pulse-fast" style={{ right: count > 0 ? '-14px' : '-8px', top: '2px' }}></div>;
+                      }
+                      return null;
+                    })()}
+                  </div>
+                </button>
               );
-              count = uniquePendingProducts.size;
-            } else {
-              count = orders.filter(o => {
-                const isEmployee = role === 'employee';
-                if (isEmployee) {
-                  if (tab.id === 'placed') return o.items.some(i => ['placed', 'visto', 'en_curso'].includes(i.status));
-                  if (tab.id === 'arriving') return o.items.some(i => i.status === 'bought');
-                  if (tab.id === 'received') return o.items.some(i => i.status === 'received');
-                } else {
-                  if (tab.id === 'pending') return o.items.some(i => ['placed', 'visto', 'en_curso'].includes(i.status));
-                  if (tab.id === 'bought') return o.items.some(i => i.status === 'bought');
-                  if (tab.id === 'arriving') return o.items.some(i => i.status === 'bought');
-                  if (tab.id === 'received') return o.items.some(i => i.status === 'received');
-                }
-                return false;
-              }).length;
-            }
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as OrderStatus)}
-                className={`nav-tab ${isActive ? 'nav-tab-active' : ''}`}
-              >
-                <div className="flex items-center gap-2 relative">
-                  {tab.icon}
-                  {tab.label}
-                  {count > 0 && (
-                    <span className={`px-2 py-0.5 rounded-lg text-[9px] min-w-[20px] text-center font-black ${isActive ? 'bg-primary text-white' : 'bg-white/10 text-muted'}`}>
-                      {count}
-                    </span>
-                  )}
-                  {(() => {
-                    const isNewAdmin = role === 'admin' && tab.id === 'pending' && orders.some(o => o.items.some(i => i.status === 'placed'));
-                    const isNewEmployee = role === 'employee' && tab.id === 'arriving' && orders.some(o => o.items.some(i => i.status === 'bought'));
-                    const isUpdatedEmployee = role === 'employee' && tab.id === 'placed' && orders.some(o => o.items.some(i => ['visto', 'en_curso', 'anulado'].includes(i.status)));
-                    
-                    if (isNewAdmin || isNewEmployee || isUpdatedEmployee) {
-                      return <div className="notification-dot animate-pulse-fast" style={{ right: count > 0 ? '-14px' : '-8px', top: '2px' }}></div>;
-                    }
-                    return null;
-                  })()}
-                </div>
-              </button>
-            );
-          })}
-        </div>
+            })}
+          </div>
+        )}
 
         {role === 'employee' ? (
           <EmployeeDashboard 
+            isMobile={isMobile}
             products={products} onProductsImport={setProducts} cart={cart} onAddToCart={addToCart} 
             onAddManualToCart={addManualToCart}
             onUpdateCartQuantity={updateCartQuantity}
@@ -529,14 +537,14 @@ const App: React.FC = () => {
           />
         ) : activeTab === 'totales' ? (
           <div className="space-y-8 animate-in">
-            <div className="flex justify-between items-center bg-white/5 p-6 rounded-2xl border border-white/10">
+            <div className={`flex justify-between items-center bg-white/5 p-6 rounded-2xl border border-white/10 ${isMobile ? 'flex-col gap-4 text-center' : ''}`}>
               <div>
-                <h2 className="text-xl font-black text-white tracking-widest uppercase mb-1">COMPILADO DE PEDIDOS</h2>
+                <h2 className={`${isMobile ? 'text-lg' : 'text-xl'} font-black text-white tracking-widest uppercase mb-1`}>COMPILADO DE PEDIDOS</h2>
                 <p className="text-xs text-muted font-bold uppercase tracking-widest">Total acumulado de todos los pedidos pendientes</p>
               </div>
               <button 
                 onClick={() => window.print()} 
-                className="btn py-2 px-6 text-[10px] bg-primary/10 text-primary hover:bg-primary hover:text-white border border-primary/20 transition-all font-black tracking-widest flex items-center gap-2"
+                className={`btn py-2 px-6 text-[10px] bg-primary/10 text-primary hover:bg-primary hover:text-white border border-primary/20 transition-all font-black tracking-widest flex items-center gap-2 ${isMobile ? 'w-full justify-center' : ''}`}
               >
                 <FileUp size={14} /> IMPRIMIR LISTA
               </button>
@@ -642,6 +650,7 @@ const App: React.FC = () => {
           <StatsDashboard orders={orders} products={products} />
         ) : (
           <AdminDashboard 
+            isMobile={isMobile}
             orders={orders} products={products} onUpdateStatus={handleUpdateStatus} onClearProducts={handleClearProducts} 
             onBuyItem={handleBuyItem} onUpdateItemStatus={handleUpdateItemStatus} activeTab={activeTab as OrderStatus} isSubmitting={isSubmitting}
             setDateModal={setDateModal}
@@ -651,6 +660,16 @@ const App: React.FC = () => {
           />
         )}
       </main>
+
+      {/* MOBILE BOTTOM NAVIGATION */}
+      {isMobile && role && (
+        <MobileBottomNav 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          role={role} 
+          orders={orders} 
+        />
+      )}
 
       {/* MODAL DE SELECCIÓN DE FECHA (GLOBLAMENTE ACCESIBLE) */}
       {dateModal.isOpen && (
@@ -933,6 +952,7 @@ const StatsDashboard: React.FC<{
 };
 
 const EmployeeDashboard: React.FC<{ 
+  isMobile: boolean;
   products: Product[]; onProductsImport: (p: Product[]) => void;
   cart: OrderItem[]; onAddToCart: (p: Product) => void;
   onUpdateCartQuantity: (id: string, q: number) => void; onRemoveFromCart: (id: string) => void;
@@ -947,7 +967,7 @@ const EmployeeDashboard: React.FC<{
   onUpdateItemStatus: (order: Order, itemId: string, s: OrderItemStatus, d?: string, cn?: string) => void;
   onAddManualToCart?: (name: string, quantity: number) => void;
 }> = ({ 
-  products, onProductsImport, cart, onAddToCart, onAddManualToCart, onUpdateCartQuantity, onRemoveFromCart, 
+  isMobile, products, onProductsImport, cart, onAddToCart, onAddManualToCart, onUpdateCartQuantity, onRemoveFromCart, 
   onSubmitOrder, isSubmitting, orders, onUpdateStatus, activeTab, editingOrderId, onEditOrder, 
   onDeleteOrder, onCancelEdit, orderNotes, onOrderNotesChange, onUpdateItemStatus
 }) => {
@@ -957,6 +977,7 @@ const EmployeeDashboard: React.FC<{
   const [showManualForm, setShowManualForm] = useState(false);
   const [manualName, setManualName] = useState('');
   const [manualQty, setManualQty] = useState(1);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   
   const cartContainerRef = React.useRef<HTMLDivElement>(null);
 
@@ -1180,16 +1201,16 @@ const EmployeeDashboard: React.FC<{
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-            <div className="lg:col-span-2 space-y-6">
-              <div className="product-list space-y-3 custom-scrollbar" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+            <div className={`${isMobile ? 'col-span-1' : 'lg:col-span-2'} space-y-6`}>
+              <div className="product-list space-y-3 custom-scrollbar" style={{ maxHeight: isMobile ? '60vh' : '70vh', overflowY: 'auto' }}>
                 {filteredProducts.map(product => (
-                  <div key={product.id} className="product-card animate-in flex items-center justify-between gap-4 py-3 px-4">
-                    <div className="flex items-center gap-4 flex-1 min-w-0">
-                      <div className="flex flex-col gap-1.5 min-w-[120px] flex-shrink-0">
-                        <div className="bg-white/5 px-2 py-1 rounded text-[11px] font-mono text-primary font-bold w-fit">
+                  <div key={product.id} className={`product-card animate-in flex items-center justify-between gap-4 ${isMobile ? 'py-2 px-3' : 'py-3 px-4'}`}>
+                    <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                      <div className={`flex flex-col gap-1.5 ${isMobile ? 'min-w-[90px]' : 'min-w-[120px]'} flex-shrink-0`}>
+                        <div className="bg-white/5 px-2 py-1 rounded text-[10px] sm:text-[11px] font-mono text-primary font-bold w-fit">
                           {product.code}
                         </div>
-                        <div className={`badge ${(product.stock || 0) > 0 ? 'badge-on-stock' : 'badge-out-of-stock'} text-[10px] py-1 px-2 w-full text-center`} style={{ 
+                        <div className={`badge ${(product.stock || 0) > 0 ? 'badge-on-stock' : 'badge-out-of-stock'} text-[9px] sm:text-[10px] py-1 px-2 w-full text-center`} style={{ 
                           background: (product.stock || 0) > 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
                           color: (product.stock || 0) > 0 ? '#10b981' : '#ef4444',
                           border: `1px solid ${(product.stock || 0) > 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
@@ -1200,10 +1221,10 @@ const EmployeeDashboard: React.FC<{
                       </div>
                       
                       <div className="min-w-0">
-                        <h4 className="font-bold text-base leading-tight group-hover:text-primary transition-colors truncate">
+                        <h4 className={`${isMobile ? 'text-sm' : 'text-base'} font-bold leading-tight group-hover:text-primary transition-colors truncate`}>
                           {product.name}
                         </h4>
-                        <span className="text-[10px] text-muted uppercase tracking-widest font-bold block">
+                        <span className="text-[9px] sm:text-[10px] text-muted uppercase tracking-widest font-bold block">
                           {product.category}
                         </span>
                       </div>
@@ -1211,16 +1232,17 @@ const EmployeeDashboard: React.FC<{
 
                     <button 
                       onClick={() => onAddToCart(product)} 
-                      className="p-2 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-lg transition-all flex-shrink-0"
+                      className={`${isMobile ? 'p-1.5' : 'p-2'} bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-lg transition-all flex-shrink-0`}
                     >
-                      <Plus size={18} strokeWidth={3} />
+                      <Plus size={isMobile ? 16 : 18} strokeWidth={3} />
                     </button>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="cart-sidebar space-y-6">
+            {!isMobile && (
+              <div className="cart-sidebar space-y-6">
               <div className="glass-panel p-6 sticky top-24 border-primary/20 bg-primary/[0.02]">
                 <h3 className="text-xl font-bold mb-6 flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -1322,8 +1344,56 @@ const EmployeeDashboard: React.FC<{
                   </div>
               </div>
             </div>
+            )}
           </div>
-          
+
+          {/* MOBILE FLOATING CART ACTION */}
+          {isMobile && cart.length > 0 && (
+            <div className="fixed bottom-20 left-4 right-4 z-50 animate-in slide-in-from-bottom-4">
+              <button 
+                onClick={() => setIsCartOpen(true)}
+                className="btn btn-primary w-full py-4 rounded-2xl shadow-2xl flex items-center justify-between px-6 border border-white/10"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <ShoppingBag size={20} />
+                    <span className="absolute -top-2 -right-2 bg-white text-primary text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center">
+                      {cart.length}
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-black uppercase tracking-widest">Ver mi pedido</span>
+                </div>
+                <div className="flex flex-col items-end">
+                  <span className="text-[8px] opacity-70 font-bold uppercase tracking-widest">Subtotal Est.</span>
+                  <span className="text-sm font-black">${cart.reduce((acc, item) => {
+                    const prod = products.find(p => p.id === item.product_id);
+                    return acc + (prod?.price || 0) * item.quantity;
+                  }, 0).toLocaleString()}</span>
+                </div>
+              </button>
+            </div>
+          )}
+
+          {/* MOBILE CART DRAWER */}
+          {isMobile && (
+            <MobileCartDrawer 
+              isOpen={isCartOpen}
+              onClose={() => setIsCartOpen(false)}
+              cart={cart}
+              products={products}
+              onUpdateQuantity={onUpdateCartQuantity}
+              onRemove={onRemoveFromCart}
+              orderNotes={orderNotes}
+              onOrderNotesChange={onOrderNotesChange}
+              onSubmit={async () => {
+                await onSubmitOrder();
+                setIsCartOpen(false);
+              }}
+              isSubmitting={isSubmitting}
+              editingOrderId={editingOrderId}
+              onCancelEdit={onCancelEdit}
+            />
+          )}
         </>
       ) : (
         <div className="space-y-6">
@@ -1592,6 +1662,7 @@ const EmployeeDashboard: React.FC<{
 };
 
 const AdminDashboard: React.FC<{ 
+  isMobile: boolean;
   orders: Order[]; products: Product[]; onUpdateStatus: (id: string, s: OrderStatus, d?: string) => void;
   onClearProducts: () => void;
   onBuyItem: (order: Order, item: OrderItem) => void;
@@ -1602,7 +1673,7 @@ const AdminDashboard: React.FC<{
   setTempDate: (d: string) => void;
   setCancelItemModal: React.Dispatch<React.SetStateAction<{ isOpen: boolean; order: Order | null; itemId: string | null; note: string; }>>;
   setNoteModal: React.Dispatch<React.SetStateAction<{ isOpen: boolean; order: Order | null; itemId: string | null; status: OrderItemStatus | null; title: string; estimatedDate?: string; }>>;
-}> = ({ orders, products, onUpdateStatus, onClearProducts, onBuyItem, onUpdateItemStatus, activeTab, isSubmitting, setDateModal, setTempDate, setCancelItemModal, setNoteModal }) => {
+}> = ({ isMobile, orders, products, onUpdateStatus, onClearProducts, onBuyItem, onUpdateItemStatus, activeTab, isSubmitting, setDateModal, setTempDate, setCancelItemModal, setNoteModal }) => {
   const [shouldAddNote, setShouldAddNote] = useState(false);
   const filteredOrders = orders.filter(o => {
     const isSalesTab = activeTab === 'pending';
@@ -1675,6 +1746,22 @@ const AdminDashboard: React.FC<{
               const prod = products.find(p => p.id === item.product_id);
               return acc + (prod?.cost || 0) * item.quantity;
             }, 0);
+
+            if (isMobile) {
+              return (
+                <MobileAdminOrderCard 
+                  key={order.id}
+                  order={order}
+                  totalCost={totalCost}
+                  onUpdateStatus={onUpdateStatus}
+                  onUpdateItemStatus={onUpdateItemStatus}
+                  onBuyItem={onBuyItem}
+                  setDateModal={setDateModal}
+                  setTempDate={setTempDate}
+                  setNoteModal={setNoteModal}
+                />
+              );
+            }
 
             return (
               <div key={order.id} className="modern-order-card p-8">
