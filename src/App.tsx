@@ -58,6 +58,15 @@ const App: React.FC = () => {
     estimatedDate?: string;
   }>({ isOpen: false, order: null, itemId: null, status: null, title: '' });
   const [tempNote, setTempNote] = useState('');
+  const [hapticsEnabled, setHapticsEnabled] = useState(() => {
+    return localStorage.getItem('vidal_haptics') !== 'false';
+  });
+
+  const triggerHaptic = (pattern: number | number[] = 10) => {
+    if (hapticsEnabled && typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(pattern);
+    }
+  };
 
   useEffect(() => {
     if (role) {
@@ -66,6 +75,10 @@ const App: React.FC = () => {
       localStorage.removeItem('vidal_role');
     }
   }, [role]);
+
+  useEffect(() => {
+    localStorage.setItem('vidal_haptics', String(hapticsEnabled));
+  }, [hapticsEnabled]);
 
   useEffect(() => {
     if (!supabase) {
@@ -161,6 +174,7 @@ const App: React.FC = () => {
   };
 
   const handleUpdateStatus = async (id: string, status: OrderStatus, arrivalDate?: string) => {
+    triggerHaptic(20);
     const order = orders.find(o => o.id === id);
     if (!order) return;
 
@@ -183,6 +197,7 @@ const App: React.FC = () => {
   };
 
   const addToCart = (product: Product) => {
+    triggerHaptic(10);
     setCart(prev => {
       const existing = prev.find(item => item.product_id === product.id);
       if (existing) {
@@ -204,6 +219,7 @@ const App: React.FC = () => {
   };
 
   const addManualToCart = (name: string, quantity: number) => {
+    triggerHaptic(15);
     setCart(prev => [...prev, {
       id: crypto.randomUUID(),
       product_id: `manual-${crypto.randomUUID()}`,
@@ -230,6 +246,7 @@ const App: React.FC = () => {
 
   const submitOrder = async () => {
     if (cart.length === 0) return;
+    triggerHaptic([30, 50, 30]);
     setIsSubmitting(true);
     
     if (editingOrderId) {
@@ -280,6 +297,7 @@ const App: React.FC = () => {
 
   const handleBuyItem = async (order: Order, item: OrderItem) => {
     if (!supabase) return;
+    triggerHaptic([15, 5, 15]);
     setIsSubmitting(true);
 
     const otherItems = order.items.filter(i => i.id !== item.id);
@@ -315,6 +333,7 @@ const App: React.FC = () => {
   };
 
   const handleUpdateItemStatus = async (order: Order, itemId: string, status: OrderItemStatus, estimatedDate?: string, cancellationNote?: string, adminNote?: string) => {
+    triggerHaptic(10);
     const updatedItems = order.items.map(i => 
       i.id === itemId ? { ...i, status, estimated_date: estimatedDate, cancellation_note: cancellationNote, admin_note: adminNote } : i
     );
@@ -440,6 +459,27 @@ const App: React.FC = () => {
               >
                 <span className="hidden sm:inline">Cambiar Vista</span>
                 <span className="sm:hidden">VISTA</span>
+              </button>
+            )}
+            {isMobile && (
+              <button 
+                onClick={() => {
+                  setHapticsEnabled(!hapticsEnabled);
+                  if (!hapticsEnabled) triggerHaptic([20, 50, 20]);
+                }}
+                className={`p-2 rounded-full transition-all ${hapticsEnabled ? 'text-primary bg-primary/10' : 'text-muted bg-white/5'}`}
+                title={hapticsEnabled ? 'Desactivar Vibración' : 'Activar Vibración'}
+              >
+                <motion.div animate={{ rotate: hapticsEnabled ? 0 : 45 }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2v2"></path>
+                    <path d="m4.93 4.93 1.41 1.41"></path>
+                    <path d="M20 12h2"></path>
+                    <path d="m19.07 4.93-1.41 1.41"></path>
+                    <path d="M15.412 15.677c-2.337-1.363-4.484-1.363-6.824 0"></path>
+                    <rect width="8" height="14" x="8" y="5" rx="2"></rect>
+                  </svg>
+                </motion.div>
               </button>
             )}
             <button onClick={handleLogout} className="p-2 hover:bg-glass-bg rounded-full transition-colors"><LogOut size={20} /></button>
