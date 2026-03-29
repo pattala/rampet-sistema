@@ -9,7 +9,6 @@ import { MobileBottomNav } from './components/MobileBottomNav';
 import { MobileCartDrawer } from './components/MobileCartDrawer';
 import { MobileAdminOrderCard } from './components/MobileAdminOrderCard';
 
-const isSupabaseConfigured = !!supabase;
 
 const App: React.FC = () => {
   const [authRole, setAuthRole] = useState<UserRole | null>(null);
