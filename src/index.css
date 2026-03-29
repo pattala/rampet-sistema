@@ -1099,3 +1099,18 @@ h1, h2, h3 {
   }
 }
 
+/* BLOQUEO NUCLEAR DE NAVEGACIÓN DESKTOP EN MÓVILES (V4.4) */
+@media screen and (max-width: 1280px) {
+  .desktop-tabs-nav, 
+  #desktop-nav-header,
+  div[className*="desktop-tabs-nav"],
+  .tabs-container {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+  }
+}
