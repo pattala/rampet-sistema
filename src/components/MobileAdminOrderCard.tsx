@@ -16,7 +16,7 @@ interface MobileAdminOrderCardProps {
 export const MobileAdminOrderCard: React.FC<MobileAdminOrderCardProps> = ({ 
   order, totalCost, onUpdateStatus, onUpdateItemStatus, onBuyItem, setDateModal, setTempDate, setNoteModal
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   return (
     <div className="modern-order-card p-4 mb-4 animate-in">
@@ -57,7 +57,7 @@ export const MobileAdminOrderCard: React.FC<MobileAdminOrderCardProps> = ({
             <div key={idx} className="bg-white/5 p-3 rounded-xl border border-white/5">
               <div className="flex justify-between items-start gap-2 mb-2">
                 <span className="text-xs font-bold text-white/90 leading-tight">{item.product_name}</span>
-                <div className="qty-badge w-8 h-8 min-h-[32px] flex-shrink-0">
+                <div className="qty-badge w-7 h-7 min-h-[28px] flex-shrink-0">
                   <span className="text-xs font-black">{item.quantity}</span>
                 </div>
               </div>
