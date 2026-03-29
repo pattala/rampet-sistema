@@ -7,6 +7,7 @@ interface MobileAdminOrderCardProps {
   totalCost: number;
   products: Product[];
   allOrders: Order[];
+  activeTab: string;
   onUpdateStatus: (id: string, s: OrderStatus, d?: string) => void;
   onUpdateItemStatus: (order: Order, itemId: string, s: OrderItemStatus, d?: string, n?: string, an?: string) => void;
   onBuyItem: (order: Order, item: OrderItem) => void;
@@ -16,7 +17,7 @@ interface MobileAdminOrderCardProps {
 }
 
 export const MobileAdminOrderCard: React.FC<MobileAdminOrderCardProps> = ({ 
-  order, products, allOrders, onUpdateStatus, onUpdateItemStatus, onBuyItem, setDateModal, setTempDate, setNoteModal
+  order, products, allOrders, activeTab, onUpdateStatus, onUpdateItemStatus, onBuyItem, setDateModal, setTempDate, setNoteModal
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -115,6 +116,7 @@ export const MobileAdminOrderCard: React.FC<MobileAdminOrderCardProps> = ({
                 )}
                 
                 {/* GRILLA DE ACCIONES DIRECTAS 2x2 (HORIZONTALES) */}
+                {activeTab !== 'bought' && activeTab !== 'received' && (
                 <div className="grid grid-cols-2 gap-3 pt-2 ml-2">
                   <button 
                     onClick={() => onUpdateItemStatus(order, item.id, 'visto')}
@@ -154,6 +156,7 @@ export const MobileAdminOrderCard: React.FC<MobileAdminOrderCardProps> = ({
                     <Edit3 size={16} /> NOTA AL ÍTEM
                   </button>
                 </div>
+                )}
               </div>
             );
           })}
@@ -161,7 +164,7 @@ export const MobileAdminOrderCard: React.FC<MobileAdminOrderCardProps> = ({
       )}
 
       {/* QUICK ACTIONS FOR ADMIN */}
-      {order.items.some(i => ['placed', 'visto', 'en_curso'].includes(i.status)) && (
+      {activeTab !== 'bought' && activeTab !== 'received' && order.items.some(i => ['placed', 'visto', 'en_curso'].includes(i.status)) && (
         <div className="pt-4 mt-2">
            <button 
              onClick={() => onUpdateStatus(order.id, 'bought')}

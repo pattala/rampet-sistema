@@ -1853,6 +1853,7 @@ const AdminDashboard: React.FC<{
                   totalCost={totalCost}
                   products={products}
                   allOrders={orders}
+                  activeTab={activeTab}
                   onUpdateStatus={onUpdateStatus}
                   onUpdateItemStatus={onUpdateItemStatus}
                   onBuyItem={onBuyItem}
