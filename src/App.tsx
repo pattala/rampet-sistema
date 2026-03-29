@@ -57,6 +57,7 @@ const App: React.FC = () => {
     title: string;
     estimatedDate?: string;
   }>({ isOpen: false, order: null, itemId: null, status: null, title: '' });
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [tempNote, setTempNote] = useState('');
   const [hapticsEnabled, setHapticsEnabled] = useState(() => {
     return localStorage.getItem('vidal_haptics') !== 'false';
@@ -442,9 +443,77 @@ const App: React.FC = () => {
         </div>
       ) : (
         <div className="flex flex-col min-h-screen">
-      <header className={`glass-panel rounded-none border-x-0 border-t-0 p-4 sticky top-0 z-50 ${isMobile ? 'pt-12 pb-4' : ''}`}>
+      {/* MOBILE SIDEBAR DRAWERS */}
+      {isMobile && isSidebarOpen && (
+        <div className="fixed inset-0 z-[100] animate-in fade-in duration-300">
+           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />
+           <motion.div 
+             initial={{ x: '-100%' }} animate={{ x: 0 }} 
+             className="absolute left-0 top-0 bottom-0 w-[280px] bg-[#0f172a] border-r border-white/10 p-6 shadow-2xl flex flex-col"
+           >
+              <div className="flex items-center gap-4 mb-8 pb-4 border-b border-white/10">
+                <div className="bg-white rounded-lg p-1" style={{ width: '60px', height: '30px' }}>
+                   <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+                </div>
+                <span className="font-black text-lg text-white">RAMPET MENU</span>
+              </div>
+
+              <nav className="flex-1 space-y-2 overflow-y-auto">
+                {(role === 'employee' 
+                    ? [
+                        { id: 'pending', label: 'NUEVO PEDIDO', icon: <Plus size={20} /> },
+                        { id: 'placed', label: 'MIS PEDIDOS', icon: <Package size={20} /> },
+                        { id: 'arriving', label: 'RECEPCIÓN', icon: <Truck size={20} /> },
+                        { id: 'received', label: 'HISTORIAL', icon: <CheckCircle size={20} /> }
+                      ]
+                    : [
+                        { id: 'pending', label: 'PEDIDOS', icon: <Plus size={20} /> },
+                        { id: 'totales', label: 'TOTALES', icon: <ClipboardList size={20} /> },
+                        { id: 'bought', label: 'COMPRAS', icon: <ShoppingBag size={20} /> },
+                        { id: 'arriving', label: 'RECEPCIÓN', icon: <Truck size={20} /> },
+                        { id: 'received', label: 'HISTORIAL', icon: <CheckCircle size={20} /> },
+                        { id: 'stats', label: 'ESTADÍSTICAS', icon: <BarChart2 size={20} /> }
+                      ]
+                  ).map(tab => (
+                    <button 
+                      key={tab.id}
+                      onClick={() => { setActiveTab(tab.id as any); setIsSidebarOpen(false); }}
+                      className={`w-full flex items-center gap-4 p-4 rounded-2xl font-black text-[12px] uppercase transition-all ${activeTab === tab.id ? 'bg-primary text-black' : 'text-white hover:bg-white/5'}`}
+                    >
+                      {tab.icon}
+                      {tab.label}
+                    </button>
+                  ))}
+              </nav>
+
+              <div className="pt-4 border-t border-white/10 space-y-2">
+                 <button onClick={() => { setHapticsEnabled(!hapticsEnabled); triggerHaptic(10); }} className="w-full flex items-center gap-4 p-4 text-white font-black text-[11px] uppercase">
+                    <div className={hapticsEnabled ? 'text-primary' : 'text-muted'}>
+                       {hapticsEnabled ? <motion.div animate={{ scale: [1, 1.2, 1] }}>📳 VIBRACIÓN ON</motion.div> : '📴 VIBRACIÓN OFF'}
+                    </div>
+                 </button>
+                 <button onClick={handleLogout} className="w-full flex items-center gap-4 p-4 text-red-400 font-black text-[11px] uppercase">
+                    <LogOut size={20} /> CERRAR SESIÓN
+                 </button>
+              </div>
+           </motion.div>
+        </div>
+      )}
+
+      {/* HEADER LIMPIO (Logo + Perfil + Hamburguesa) */}
+      <header className={`glass-panel rounded-none border-x-0 border-t-0 p-4 sticky top-0 z-50 transition-all ${isMobile ? 'pt-20 pb-4 shadow-2xl' : ''}`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-4">
+            {isMobile && (
+              <button 
+                onClick={() => setIsSidebarOpen(true)}
+                className="p-3 bg-white/5 rounded-2xl text-white border border-white/10 active:scale-95 transition-all"
+              >
+                 <div className="w-6 h-0.5 bg-white mb-1.5" />
+                 <div className="w-6 h-0.5 bg-white mb-1.5" />
+                 <div className="w-4 h-0.5 bg-white" />
+              </button>
+            )}
             <div className="bg-white rounded-lg flex items-center justify-center p-1 shadow-lg shrink-0 overflow-hidden" style={{ width: '80px', height: '40px' }}>
               <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
             </div>
@@ -452,47 +521,18 @@ const App: React.FC = () => {
               RAMPET <span className="hidden sm:inline">SISTEMA</span>
             </span>
           </div>
+
           <div className="flex items-center gap-4">
-            {!isMobile && (
-              <div className="flex flex-col items-end">
-                <span className="text-sm font-semibold">{role === 'admin' ? 'Administrador' : 'Empleado'}</span>
-                <span className="text-[10px] text-muted flex items-center gap-1">
-                  <div className={`w-1.5 h-1.5 rounded-full ${isSupabaseConfigured ? 'bg-accent-success' : 'bg-accent-warning'}`}></div>
-                  <span className="mobile-hide">{isSupabaseConfigured ? 'Sync' : 'Local'}</span>
-                </span>
-              </div>
-            )}
             {authRole === 'admin' && (
               <button 
-                onClick={() => setRole(null)} 
-                className={`flex items-center gap-2 text-[11px] font-black uppercase tracking-tighter text-emerald-400 hover:text-white px-4 py-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 shadow-lg shadow-emerald-500/5 transition-all ${isMobile ? 'mx-1' : 'mx-2'}`}
+                onClick={() => setRole(role === 'admin' ? 'employee' : 'admin')} 
+                className={`flex items-center gap-2 text-[11px] font-black uppercase tracking-tighter text-emerald-400 hover:text-white px-4 py-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 shadow-lg shadow-emerald-500/5 transition-all`}
               >
-                <motion.div animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} className="w-1.5 h-1.5 bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-                <span>{isMobile ? 'MODO PC' : 'CAMBIAR VISTA'}</span>
+                <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                <span>{isMobile ? role === 'admin' ? 'A EMPLEADO' : 'A ADMIN' : 'CAMBIAR VISTA'}</span>
               </button>
             )}
-            {isMobile && (
-              <button 
-                onClick={() => {
-                  setHapticsEnabled(!hapticsEnabled);
-                  if (!hapticsEnabled) triggerHaptic([20, 50, 20]);
-                }}
-                className={`p-2 rounded-full transition-all ${hapticsEnabled ? 'text-primary bg-primary/10' : 'text-muted bg-white/5'}`}
-                title={hapticsEnabled ? 'Desactivar Vibración' : 'Activar Vibración'}
-              >
-                <motion.div animate={{ rotate: hapticsEnabled ? 0 : 45 }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 2v2"></path>
-                    <path d="m4.93 4.93 1.41 1.41"></path>
-                    <path d="M20 12h2"></path>
-                    <path d="m19.07 4.93-1.41 1.41"></path>
-                    <path d="M15.412 15.677c-2.337-1.363-4.484-1.363-6.824 0"></path>
-                    <rect width="8" height="14" x="8" y="5" rx="2"></rect>
-                  </svg>
-                </motion.div>
-              </button>
-            )}
-            <button onClick={handleLogout} className="p-2 hover:bg-glass-bg rounded-full transition-colors"><LogOut size={20} /></button>
+            {!isMobile && <button onClick={handleLogout} className="p-2 hover:bg-glass-bg rounded-full transition-colors"><LogOut size={20} /></button>}
           </div>
         </div>
       </header>
