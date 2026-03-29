@@ -442,7 +442,7 @@ const App: React.FC = () => {
         </div>
       ) : (
         <div className="flex flex-col min-h-screen">
-      <header className="glass-panel rounded-none border-x-0 border-t-0 p-4 sticky top-0 z-50">
+      <header className={`glass-panel rounded-none border-x-0 border-t-0 p-4 sticky top-0 z-50 ${isMobile ? 'pt-12 pb-4' : ''}`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-8">
             <div className="bg-white rounded-lg flex items-center justify-center p-1 shadow-lg shrink-0 overflow-hidden" style={{ width: '80px', height: '40px' }}>
