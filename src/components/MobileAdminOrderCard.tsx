@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Clock, ChevronDown, ChevronUp, Barcode, AlertCircle, Check, Calendar, ShoppingCart, Trash2, Edit3 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Barcode, AlertCircle, Check, Calendar, ShoppingCart, Trash2, Edit3 } from 'lucide-react';
 import type { Order, OrderStatus, OrderItemStatus, OrderItem, Product } from '../types';
 
 interface MobileAdminOrderCardProps {
@@ -25,15 +25,12 @@ export const MobileAdminOrderCard: React.FC<MobileAdminOrderCardProps> = ({
       {/* CABECERA DE ORDEN SIMPLIFICADA */}
       <div className="flex justify-between items-center mb-4">
         <div onClick={() => setIsExpanded(!isExpanded)} className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-muted font-bold">{new Date(order.created_at).toLocaleDateString()}</span>
             <span className="text-sm font-black text-primary tracking-tighter">ORDEN #{order.order_number || order.id.slice(0, 8)}</span>
             {order.is_modified && (
               <span className="text-[7px] font-black bg-accent-warning text-black px-1.5 py-0.5 rounded-sm uppercase">MOD</span>
             )}
-          </div>
-          <div className="flex items-center gap-2 text-[10px] text-muted font-bold uppercase tracking-widest">
-            <Clock size={12} className="text-primary" />
-            {new Date(order.created_at).toLocaleDateString()}
           </div>
         </div>
       </div>

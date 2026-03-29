@@ -523,10 +523,7 @@ const App: React.FC = () => {
                   RAMPET <span className="hidden sm:inline">SISTEMA</span>
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black bg-indigo-500 text-white px-2 py-0.5 rounded-full shadow-lg">VERSIÓN 4.4</span>
-                <span className="text-[8px] text-indigo-300 font-bold uppercase tracking-widest animate-pulse">Touch Mode Forced</span>
-              </div>
+
             </div>
           </div>
 
@@ -1773,7 +1770,7 @@ const AdminDashboard: React.FC<{
   setCancelItemModal: React.Dispatch<React.SetStateAction<{ isOpen: boolean; order: Order | null; itemId: string | null; note: string; }>>;
   setNoteModal: React.Dispatch<React.SetStateAction<{ isOpen: boolean; order: Order | null; itemId: string | null; status: OrderItemStatus | null; title: string; estimatedDate?: string; }>>;
 }> = ({ isMobile, orders, products, onUpdateStatus, onClearProducts, onBuyItem, onUpdateItemStatus, activeTab, isSubmitting, setDateModal, setTempDate, setCancelItemModal, setNoteModal }) => {
-  const [shouldAddNote, setShouldAddNote] = useState(false);
+  const [shouldAddNote, setShouldAddNote] = useState(true);
   const filteredOrders = orders.filter(o => {
     const isSalesTab = activeTab === 'pending';
     const isPurchasesTab = activeTab === 'bought';
