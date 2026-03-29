@@ -15,8 +15,8 @@ const App: React.FC = () => {
   const [role, setRole] = useState<UserRole | null>(null);
   const [session, setSession] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const hookIsMobile = useIsMobile();
-  const isMobile = hookIsMobile || (typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+  const hookIsMobile = useIsMobile(1280);
+  const isMobile = hookIsMobile || (typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
   const [products, setProducts] = useState<Product[]>([]);
   const [activeTab, setActiveTab] = useState<OrderStatus | 'stats' | 'totales'>(() => {
     const saved = localStorage.getItem('vidal_active_tab');
@@ -500,17 +500,18 @@ const App: React.FC = () => {
       )}
 
       {/* HEADER LIMPIO (Logo + Perfil + Hamburguesa) */}
-      <header className={`glass-panel rounded-none border-x-0 border-t-0 p-4 sticky top-0 z-50 transition-all ${isMobile ? 'pt-20 pb-4 shadow-2xl' : ''}`}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {isMobile && (
+      <header className={`glass-panel rounded-none border-x-0 border-t-0 p-4 sticky top-0 z-[60] transition-all bg-slate-900/95 backdrop-blur-3xl shadow-2xl ${isMobile ? 'pt-24 pb-6' : ''}`}>
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3">
+            {(isMobile || hookIsMobile) && (
               <button 
-                onClick={() => setIsSidebarOpen(true)}
-                className="p-3 bg-white/5 rounded-2xl text-white border border-white/10 active:scale-95 transition-all"
+                onClick={(e) => { e.stopPropagation(); setIsSidebarOpen(true); }}
+                className="p-3.5 bg-primary text-black rounded-2xl shadow-[0_0_20px_rgba(99,102,241,0.4)] active:scale-95 transition-all z-[70]"
+                aria-label="Abrir Menú"
               >
-                 <div className="w-6 h-0.5 bg-white mb-1.5" />
-                 <div className="w-6 h-0.5 bg-white mb-1.5" />
-                 <div className="w-4 h-0.5 bg-white" />
+                 <div className="w-6 h-1 bg-black mb-1 rounded-full" />
+                 <div className="w-6 h-1 bg-black mb-1 rounded-full" />
+                 <div className="w-6 h-1 bg-black rounded-full" />
               </button>
             )}
             <div className="bg-white rounded-lg flex items-center justify-center p-1 shadow-lg shrink-0 overflow-hidden" style={{ width: '80px', height: '40px' }}>
