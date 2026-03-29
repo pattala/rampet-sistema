@@ -445,13 +445,15 @@ const App: React.FC = () => {
             </span>
           </div>
           <div className="flex items-center gap-4">
-            <div className="hidden md:flex flex-col items-end">
-              <span className="text-sm font-semibold">{role === 'admin' ? 'Administrador' : 'Empleado'}</span>
-              <span className="text-[10px] text-muted flex items-center gap-1">
-                <div className={`w-1.5 h-1.5 rounded-full ${isSupabaseConfigured ? 'bg-accent-success' : 'bg-accent-warning'}`}></div>
-                <span className="mobile-hide">{isSupabaseConfigured ? 'Sync' : 'Local'}</span>
-              </span>
-            </div>
+            {!isMobile && (
+              <div className="flex flex-col items-end">
+                <span className="text-sm font-semibold">{role === 'admin' ? 'Administrador' : 'Empleado'}</span>
+                <span className="text-[10px] text-muted flex items-center gap-1">
+                  <div className={`w-1.5 h-1.5 rounded-full ${isSupabaseConfigured ? 'bg-accent-success' : 'bg-accent-warning'}`}></div>
+                  <span className="mobile-hide">{isSupabaseConfigured ? 'Sync' : 'Local'}</span>
+                </span>
+              </div>
+            )}
             {authRole === 'admin' && (
               <button 
                 onClick={() => setRole(null)} 
@@ -488,6 +490,7 @@ const App: React.FC = () => {
       </header>
       <main className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8">
         {/* Role-Specific Tabs Navigation */}
+        {/* EXCLUSIÓN ESTRICTA: Solo para escritorio, bajo 1280px ni se intenta renderizar */}
         {!isMobile && (
           <div id="desktop-nav-header" className="tabs-container desktop-tabs-nav">
             {(role === 'employee' 

@@ -187,6 +187,20 @@ h1, h2, h3 {
   letter-spacing: 0.05em;
 }
 
+.btn-vivid-blue { background: linear-gradient(135deg, #2563eb, #1e40af) !important; color: white !important; border: 1px solid rgba(255,255,255,0.3) !important; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4) !important; }
+.btn-vivid-amber { background: linear-gradient(135deg, #d97706, #92400e) !important; color: white !important; border: 1px solid rgba(255,255,255,0.3) !important; box-shadow: 0 8px 20px rgba(217, 119, 6, 0.4) !important; }
+.btn-vivid-green { background: linear-gradient(135deg, #059669, #065f46) !important; color: white !important; border: 1px solid rgba(255,255,255,0.3) !important; box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4) !important; }
+.btn-vivid-red { background: linear-gradient(135deg, #dc2626, #991b1b) !important; color: white !important; border: 1px solid rgba(255,255,255,0.3) !important; box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4) !important; }
+
+.slide-in-from-bottom {
+  animation: slide-in-bottom 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slide-in-bottom {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 .badge-pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
 .badge-bought { background: rgba(99, 102, 241, 0.1); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.2); }
 .badge-arriving { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
