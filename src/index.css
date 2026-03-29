@@ -26,6 +26,11 @@
   padding: 0;
 }
 
+html, body, #root {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--bg-dark);
@@ -251,10 +256,14 @@ h1, h2, h3 {
   .grid-cols-1 { gap: 1rem !important; }
   
   /* Ocultar elementos secundarios en móvil para ganar espacio */
-  .mobile-hide { display: none !important; }
+  .mobile-hide, .tabs-container { display: none !important; }
   
   /* Hacer que los inputs ocupen todo el ancho */
   .input-field { font-size: 16px !important; /* Evita zoom automático en iOS */ }
+}
+
+@media (max-width: 1024px) {
+  .tabs-container { display: none !important; }
 }
 .max-h-\[600px\] { max-height: 600px; }
 .max-h-\[400px\] { max-height: 400px; }

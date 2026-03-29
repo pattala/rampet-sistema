@@ -1734,10 +1734,10 @@ const AdminDashboard: React.FC<{
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel border-none p-6">
+      <div className={`flex flex-col md:flex-row md:items-center justify-between gap-6 glass-panel border-none ${isMobile ? 'p-4' : 'p-6'}`}>
         <div className="flex flex-col gap-2">
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <BarChart2 size={24} className="text-primary" /> Gestión de Flujo
+          <h2 className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold flex items-center gap-2`}>
+            <BarChart2 size={isMobile ? 20 : 24} className="text-primary" /> Gestión de Flujo
           </h2>
           {lastUpdate && (
             <div className="text-[10px] text-muted font-bold uppercase tracking-widest">
@@ -1745,24 +1745,26 @@ const AdminDashboard: React.FC<{
             </div>
           )}
         </div>
-        <div className="flex gap-4 items-center">
-          <label className="flex items-center gap-2 cursor-pointer group">
-            <div className="relative">
-              <input 
-                type="checkbox" 
-                className="sr-only peer" 
-                checked={shouldAddNote}
-                onChange={(e) => setShouldAddNote(e.target.checked)}
-              />
-              <div className="w-10 h-5 bg-white/10 rounded-full peer peer-checked:bg-primary transition-all border border-white/10"></div>
-              <div className="absolute left-1 top-1 w-3 h-3 bg-white rounded-full peer-checked:translate-x-5 transition-transform shadow-lg"></div>
-            </div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-muted group-hover:text-white transition-colors">Adjuntar nota</span>
-          </label>
-          <div className="w-px h-8 bg-white/5 mx-2" />
+        <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4`}>
+          <div className={`flex items-center justify-between ${isMobile ? 'w-full px-2' : 'gap-4'}`}>
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <div className="relative">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={shouldAddNote}
+                  onChange={(e) => setShouldAddNote(e.target.checked)}
+                />
+                <div className="w-10 h-5 bg-white/10 rounded-full peer peer-checked:bg-primary transition-all border border-white/10"></div>
+                <div className="absolute left-1 top-1 w-3 h-3 bg-white rounded-full peer-checked:translate-x-5 transition-transform shadow-lg"></div>
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted group-hover:text-white transition-colors">Adjuntar nota</span>
+            </label>
+            {!isMobile && <div className="w-px h-8 bg-white/5 mx-2" />}
+          </div>
           <button 
             onClick={onClearProducts}
-            className="btn py-2 px-6 text-[10px] bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/20 transition-all font-black tracking-widest"
+            className={`btn py-2 px-6 text-[10px] bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/20 transition-all font-black tracking-widest ${isMobile ? 'w-full justify-center' : ''}`}
           >
             <Trash2 size={14} /> LIMPIAR CATÁLOGO
           </button>
