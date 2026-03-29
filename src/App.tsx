@@ -16,7 +16,7 @@ const App: React.FC = () => {
   const [session, setSession] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const hookIsMobile = useIsMobile(1280);
-  const isMobile = hookIsMobile || (typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
+  const isMobile = hookIsMobile || (typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0)) || (typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
   const [products, setProducts] = useState<Product[]>([]);
   const [activeTab, setActiveTab] = useState<OrderStatus | 'stats' | 'totales'>(() => {
     const saved = localStorage.getItem('vidal_active_tab');
@@ -524,8 +524,8 @@ const App: React.FC = () => {
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black bg-indigo-500 text-white px-2 py-0.5 rounded-full shadow-lg">VERSIÓN 4.3</span>
-                <span className="text-[8px] text-indigo-300 font-bold uppercase tracking-widest animate-pulse">Update Forced</span>
+                <span className="text-[10px] font-black bg-indigo-500 text-white px-2 py-0.5 rounded-full shadow-lg">VERSIÓN 4.4</span>
+                <span className="text-[8px] text-indigo-300 font-bold uppercase tracking-widest animate-pulse">Touch Mode Forced</span>
               </div>
             </div>
           </div>
