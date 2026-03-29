@@ -16,8 +16,8 @@ const App: React.FC = () => {
   const [role, setRole] = useState<UserRole | null>(null);
   const [session, setSession] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const isMobile = useIsMobile();
-  // Manual trigger for Vercel deploy: 2026-03-27-02-21 
+  const hookIsMobile = useIsMobile();
+  const isMobile = hookIsMobile || (typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
   const [products, setProducts] = useState<Product[]>([]);
   const [activeTab, setActiveTab] = useState<OrderStatus | 'stats' | 'totales'>(() => {
     const saved = localStorage.getItem('vidal_active_tab');

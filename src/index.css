@@ -192,6 +192,22 @@ h1, h2, h3 {
 .btn-vivid-green { background: linear-gradient(135deg, #059669, #065f46) !important; color: white !important; border: 1px solid rgba(255,255,255,0.3) !important; box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4) !important; }
 .btn-vivid-red { background: linear-gradient(135deg, #dc2626, #991b1b) !important; color: white !important; border: 1px solid rgba(255,255,255,0.3) !important; box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4) !important; }
 
+.qty-illuminated {
+  background: rgba(99, 102, 241, 0.2);
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  box-shadow: 0 0 20px var(--primary-glow), inset 0 0 10px var(--primary-glow);
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 900;
+  text-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
 .slide-in-from-bottom {
   animation: slide-in-bottom 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
