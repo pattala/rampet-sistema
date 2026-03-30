@@ -1099,18 +1099,22 @@ h1, h2, h3 {
   }
 }
 
-/* BLOQUEO NUCLEAR DE NAVEGACIÓN DESKTOP EN MÓVILES (V4.4) */
-@media screen and (max-width: 1280px) {
+/* OCULTAR TABS DESKTOP EN DISPOSITIVOS TÁCTILES */
+@media (pointer: coarse) {
   .desktop-tabs-nav, 
   #desktop-nav-header,
-  div[className*="desktop-tabs-nav"],
-  .tabs-container {
+  .tabs-container.desktop-tabs-nav {
     display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
     height: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
     overflow: hidden !important;
   }
+}
+
+/* Fallback: también ocultar si la clase is-mobile está presente */
+html.is-mobile .desktop-tabs-nav,
+html.is-mobile #desktop-nav-header,
+html.is-mobile .tabs-container.desktop-tabs-nav {
+  display: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
 }

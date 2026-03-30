@@ -500,7 +500,7 @@ const App: React.FC = () => {
       )}
 
       {/* HEADER LIMPIO (Logo + Perfil + Hamburguesa) */}
-      <header className={`glass-panel rounded-none border-x-0 border-t-0 p-4 sticky top-0 z-[60] transition-all bg-[#050b1a] backdrop-blur-3xl shadow-2xl ${isMobile ? 'pt-24 pb-6' : ''}`}>
+      <header className={`glass-panel rounded-none border-x-0 border-t-0 p-4 sticky top-0 z-[60] transition-all bg-[#050b1a] backdrop-blur-3xl shadow-2xl ${isMobile ? 'pt-2 pb-2' : ''}`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-3">
             {(isMobile || hookIsMobile) && (
