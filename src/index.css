@@ -1099,22 +1099,18 @@ h1, h2, h3 {
   }
 }
 
-/* OCULTAR TABS DESKTOP EN DISPOSITIVOS TÁCTILES */
-@media (pointer: coarse) {
+/* NAVEGACIÓN DESKTOP: OCULTA POR DEFECTO (Mobile First) */
+.desktop-tabs-nav, 
+#desktop-nav-header,
+.tabs-container.desktop-tabs-nav {
+  display: none !important;
+}
+
+/* Solo mostrar en escritorio real */
+@media screen and (min-width: 1281px) {
   .desktop-tabs-nav, 
   #desktop-nav-header,
   .tabs-container.desktop-tabs-nav {
-    display: none !important;
-    height: 0 !important;
-    overflow: hidden !important;
+    display: flex !important;
   }
-}
-
-/* Fallback: también ocultar si la clase is-mobile está presente */
-html.is-mobile .desktop-tabs-nav,
-html.is-mobile #desktop-nav-header,
-html.is-mobile .tabs-container.desktop-tabs-nav {
-  display: none !important;
-  height: 0 !important;
-  overflow: hidden !important;
 }

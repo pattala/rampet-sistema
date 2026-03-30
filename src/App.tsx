@@ -16,7 +16,7 @@ const App: React.FC = () => {
   const [session, setSession] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const hookIsMobile = useIsMobile(1280);
-  const isMobile = hookIsMobile || (typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0)) || (typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
+  const isMobile = hookIsMobile; // Let width determine if we are in mobile layout for consistent UI
   const [products, setProducts] = useState<Product[]>([]);
   const [activeTab, setActiveTab] = useState<OrderStatus | 'stats' | 'totales'>(() => {
     const saved = localStorage.getItem('vidal_active_tab');
@@ -503,7 +503,7 @@ const App: React.FC = () => {
       <header className={`glass-panel rounded-none border-x-0 border-t-0 p-4 sticky top-0 z-[60] transition-all bg-[#050b1a] backdrop-blur-3xl shadow-2xl ${isMobile ? 'pt-2 pb-2' : ''}`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-3">
-            {(isMobile || hookIsMobile) && (
+            {hookIsMobile && (
               <button 
                 onClick={(e) => { e.stopPropagation(); setIsSidebarOpen(true); }}
                 className="p-3.5 bg-primary text-black rounded-2xl shadow-[0_0_20px_rgba(99,102,241,0.4)] active:scale-95 transition-all z-[70]"
@@ -544,7 +544,7 @@ const App: React.FC = () => {
       <main className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8">
         {/* Role-Specific Tabs Navigation */}
         {/* EXCLUSIÓN ESTRICTA: Solo para escritorio, bajo 1280px ni se intenta renderizar */}
-        {!isMobile && (
+        {!hookIsMobile && (
           <div id="desktop-nav-header" className="tabs-container desktop-tabs-nav">
             {(role === 'employee' 
               ? [
